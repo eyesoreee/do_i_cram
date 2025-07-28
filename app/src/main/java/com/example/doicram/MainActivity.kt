@@ -12,8 +12,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.example.compose.DoICramTheme
 import com.example.doicram.side_menu.SideMenu
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @SuppressLint("ConfigurationScreenWidthHeight")
     @OptIn(ExperimentalMaterial3Api::class)
