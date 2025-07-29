@@ -23,6 +23,9 @@ data class Courses(
 
     @ColumnInfo(name = "passing_grade")
     val passingGrade: Double? = null,
+    
+    @ColumnInfo(name = "grade")
+    val grade: Double? = null,
 
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),

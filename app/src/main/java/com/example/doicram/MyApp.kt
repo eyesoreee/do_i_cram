@@ -16,7 +16,7 @@ class MyApp : Application() {
         database = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java,
-            "my_database"
+            "do_i_cram.db"
         ).build()
     }
 }

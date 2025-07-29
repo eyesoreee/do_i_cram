@@ -1,0 +1,9 @@
+package com.example.doicram.courses
+
+import com.example.doicram.courses.db.entities.Courses
+import com.example.doicram.courses.db.entities.GradeCategories
+
+sealed interface CoursesAction {
+    data class AddCourse(val course: Courses, val categories: List<GradeCategories>) : CoursesAction
+    data class DeleteCourse(val course: Courses) : CoursesAction
+}
