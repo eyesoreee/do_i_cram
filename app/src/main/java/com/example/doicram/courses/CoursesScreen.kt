@@ -2,7 +2,6 @@ package com.example.doicram.courses
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Add
@@ -52,105 +53,120 @@ fun CoursesScreen(
         state.courses.map { course ->
             CourseTab(
                 icon = Icons.AutoMirrored.Outlined.MenuBook,
-                text = course.code,
-                courseGrade = course.grade?.toString(),
+                text = course.course.code,
+                courseGrade = course.course.grade?.toString(),
                 onClick = {}
             )
         }
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        PageHeader(
-            title = "Courses",
-            subtitle = "Manage your courses"
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        CourseTabList(
-            courseTabs = courseTabs,
-            selectedTabIndex = selectedTabIndex,
-            onTabSelected = { selectedTabIndex = it }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        PageHeader(
-            title = "Course Management",
-            subtitle = "Add, edit, and configure your courses and grading categories."
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = "All courses",
-                style = MaterialTheme.typography.titleLarge
+    LazyColumn(
+        modifier = modifier.fillMaxSize()
+    ) {
+        // First PageHeader
+        item {
+            PageHeader(
+                title = "Courses",
+                subtitle = "Manage your courses"
             )
-
-            TextButton(
-                onClick = { showAddCourseDialog = showAddCourseDialog.not() },
-                modifier = Modifier.border(
-                    1.dp,
-                    MaterialTheme.colorScheme.inverseSurface,
-                    MaterialTheme.shapes.extraLarge
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.inverseSurface,
-                    modifier = Modifier.size(16.dp)
-                )
-
-                Spacer(modifier = Modifier.width(2.dp))
-
-                Text(text = "Add Course", color = MaterialTheme.colorScheme.inverseSurface)
-            }
+            Spacer(modifier = Modifier.height(32.dp))
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        // CourseTabList
+        item {
+            CourseTabList(
+                courseTabs = courseTabs,
+                selectedTabIndex = selectedTabIndex,
+                onTabSelected = { selectedTabIndex = it }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Second PageHeader
+        item {
+            PageHeader(
+                title = "Course Management",
+                subtitle = "Add, edit, and configure your courses and grading categories."
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Row with "All courses" and "Add Course" button
+        item {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "All courses",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                TextButton(
+                    onClick = { showAddCourseDialog = showAddCourseDialog.not() },
+                    modifier = Modifier.border(
+                        1.dp,
+                        MaterialTheme.colorScheme.inverseSurface,
+                        MaterialTheme.shapes.extraLarge
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.inverseSurface,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text(
+                        text = "Add Course",
+                        color = MaterialTheme.colorScheme.inverseSurface
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
         when {
             state.isLoading -> {
-                Loading()
+                item { Loading() }
             }
 
             state.error != null -> {
-                ErrorLoadingCourses(
-                    state = state,
-                    onRefresh = viewModel::loadCourses
-                )
+                item {
+                    ErrorLoadingCourses(
+                        state = state,
+                        onRefresh = viewModel::loadCourses
+                    )
+                }
             }
 
             state.courses.isEmpty() -> {
-                EmptyCourseList(onClick = { showAddCourseDialog = showAddCourseDialog.not() })
+                item {
+                    EmptyCourseList(
+                        onClick = { showAddCourseDialog = showAddCourseDialog.not() }
+                    )
+                }
             }
 
             else -> {
-                CourseList(
-                    state = state,
-                    onEdit = {
-                        // TODO: Navigate to edit course screen
-                    },
-                    onDelete = { course ->
-                        viewModel.deleteCourse(course)
-                    }
-                )
+                items(state.courses) { course ->
+                    CourseCard(
+                        course = course,
+                        onEdit = { },
+                        onDelete = { viewModel.onAction(CoursesAction.DeleteCourse(course.course)) }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
-
-        AddCourseDialog(
-            showDialog = showAddCourseDialog,
-            onDismissRequest = { showAddCourseDialog = false },
-            onAddCourse = { course, categories ->
-                viewModel.addCourseWithCategories(course, categories)
-                showAddCourseDialog = false
-            },
-        )
     }
+
+    AddCourseDialog(
+        showDialog = showAddCourseDialog,
+        onDismissRequest = { showAddCourseDialog = false },
+        onAddCourse = { course, categories ->
+            viewModel.onAction(CoursesAction.AddCourse(course, categories))
+            showAddCourseDialog = false
+        }
+    )
 }

@@ -57,7 +57,7 @@ class CoursesViewModel @Inject constructor(
         }
     }
 
-    fun addCourseWithCategories(course: Courses, categories: List<GradeCategories>) {
+    private fun addCourseWithCategories(course: Courses, categories: List<GradeCategories>) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             try {
@@ -79,7 +79,7 @@ class CoursesViewModel @Inject constructor(
         }
     }
 
-    fun deleteCourse(course: Courses) {
+    private fun deleteCourse(course: Courses) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             try {
