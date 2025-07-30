@@ -1,7 +1,10 @@
 package com.example.doicram
 
+import com.example.doicram.courses.db.dao.AssignmentsDao
 import com.example.doicram.courses.db.dao.CoursesDao
 import com.example.doicram.courses.db.dao.GradeCategoriesDao
+import com.example.doicram.courses.db.repo.AssignmentsRepository
+import com.example.doicram.courses.db.repo.AssignmentsRepositoryImpl
 import com.example.doicram.courses.db.repo.CoursesRepository
 import com.example.doicram.courses.db.repo.CoursesRepositoryImpl
 import com.example.doicram.courses.db.repo.GradeCategoriesRepository
@@ -29,4 +32,9 @@ object RepositoryModule {
         return GradeCategoriesRepositoryImpl(gradeCategoriesDao)
     }
 
+    @Provides
+    @Singleton
+    fun provideAssignmentsRepository(assignmentsDao: AssignmentsDao): AssignmentsRepository {
+        return AssignmentsRepositoryImpl(assignmentsDao)
+    }
 }

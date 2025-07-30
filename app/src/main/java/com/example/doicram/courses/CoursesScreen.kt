@@ -82,50 +82,6 @@ fun CoursesScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Second PageHeader
-        item {
-            PageHeader(
-                title = "Course Management",
-                subtitle = "Add, edit, and configure your courses and grading categories."
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // Row with "All courses" and "Add Course" button
-        item {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "All courses",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                TextButton(
-                    onClick = { showAddCourseDialog = showAddCourseDialog.not() },
-                    modifier = Modifier.border(
-                        1.dp,
-                        MaterialTheme.colorScheme.inverseSurface,
-                        MaterialTheme.shapes.extraLarge
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.inverseSurface,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Text(
-                        text = "Add Course",
-                        color = MaterialTheme.colorScheme.inverseSurface
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-
         when {
             state.isLoading -> {
                 item { Loading() }
@@ -148,7 +104,57 @@ fun CoursesScreen(
                 }
             }
 
+            selectedTabIndex != -1 -> {
+                val selectedCourse = state.courses[selectedTabIndex]
+                item {
+                    Text(text = "Selected Course: ${selectedCourse.course}")
+                }
+            }
+
             else -> {
+                item {
+                    PageHeader(
+                        title = "Course Management",
+                        subtitle = "Add, edit, and configure your courses and grading categories."
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                // Row with "All courses" and "Add Course" button
+                item {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "All courses",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        TextButton(
+                            onClick = { showAddCourseDialog = showAddCourseDialog.not() },
+                            modifier = Modifier.border(
+                                1.dp,
+                                MaterialTheme.colorScheme.inverseSurface,
+                                MaterialTheme.shapes.extraLarge
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.inverseSurface,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Text(
+                                text = "Add Course",
+                                color = MaterialTheme.colorScheme.inverseSurface
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
                 items(state.courses) { course ->
                     CourseCard(
                         course = course,

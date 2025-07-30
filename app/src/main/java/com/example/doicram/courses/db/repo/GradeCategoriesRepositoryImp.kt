@@ -12,8 +12,16 @@ class GradeCategoriesRepositoryImpl @Inject constructor(
         gradeCategoriesDao.addCategory(category)
     }
 
+    override suspend fun updateCategory(category: GradeCategories) {
+        gradeCategoriesDao.updateCategory(category)
+    }
+
     override suspend fun getCategoriesForCourse(courseId: Int): List<GradeCategories> {
         return gradeCategoriesDao.getCategoriesForCourse(courseId)
+    }
+
+    override suspend fun getCategoryById(categoryId: Int): GradeCategories? {
+        return gradeCategoriesDao.getCategoryById(categoryId)
     }
 
     override suspend fun deleteCategory(category: GradeCategories) {

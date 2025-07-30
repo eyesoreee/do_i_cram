@@ -2,6 +2,7 @@ package com.example.doicram
 
 import android.content.Context
 import androidx.room.Room
+import com.example.doicram.courses.db.dao.AssignmentsDao
 import com.example.doicram.courses.db.dao.CoursesDao
 import com.example.doicram.courses.db.dao.GradeCategoriesDao
 import dagger.Module
@@ -22,7 +23,7 @@ object DatabaseModule {
             context.applicationContext,
             AppDatabase::class.java,
             "do_i_cram.db"
-        ).build()
+        ).fallbackToDestructiveMigration(true).build()
     }
 
     @Provides
@@ -35,5 +36,11 @@ object DatabaseModule {
     @Singleton
     fun provideGradeCategoriesDao(database: AppDatabase): GradeCategoriesDao {
         return database.gradeCategoriesDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAssignmentsDao(database: AppDatabase): AssignmentsDao {
+        return database.assignmentsDao()
     }
 }
