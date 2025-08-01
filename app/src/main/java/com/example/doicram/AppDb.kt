@@ -9,7 +9,7 @@ import com.example.doicram.courses.db.entities.Assignments
 import com.example.doicram.courses.db.entities.Courses
 import com.example.doicram.courses.db.entities.GradeCategories
 
-@Database(entities = [Courses::class, GradeCategories::class, Assignments::class], version = 3)
+@Database(entities = [Courses::class, GradeCategories::class, Assignments::class], version = 4)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun coursesDao(): CoursesDao
     abstract fun gradeCategoriesDao(): GradeCategoriesDao

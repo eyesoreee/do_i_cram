@@ -6,4 +6,6 @@ import com.example.doicram.courses.db.entities.GradeCategories
 sealed interface CoursesAction {
     data class AddCourse(val course: Courses, val categories: List<GradeCategories>) : CoursesAction
     data class DeleteCourse(val course: Courses) : CoursesAction
+    data class SelectCourse(val courseId: Int) : CoursesAction
+    data object DeselectCourse : CoursesAction
 }

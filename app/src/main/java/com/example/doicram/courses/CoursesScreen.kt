@@ -77,7 +77,15 @@ fun CoursesScreen(
             CourseTabList(
                 courseTabs = courseTabs,
                 selectedTabIndex = selectedTabIndex,
-                onTabSelected = { selectedTabIndex = it }
+                onTabSelected = { index ->
+                    if (index >= 0 && index < state.courses.size) {
+                        selectedTabIndex = index
+                        viewModel.onAction(CoursesAction.SelectCourse(state.courses[index].course.id))
+                    } else {
+                        selectedTabIndex = -1
+                        viewModel.onAction(CoursesAction.DeselectCourse)
+                    }
+                },
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -104,10 +112,9 @@ fun CoursesScreen(
                 }
             }
 
-            selectedTabIndex != -1 -> {
-                val selectedCourse = state.courses[selectedTabIndex]
+            state.selectedCourse != null -> {
                 item {
-                    Text(text = "Selected Course: ${selectedCourse.course}")
+                    DetailedCourse(state.selectedCourse!!)
                 }
             }
 

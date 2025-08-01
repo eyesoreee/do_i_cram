@@ -2,6 +2,7 @@ package com.example.doicram.courses.db.repo
 
 import com.example.doicram.courses.db.dao.CoursesDao
 import com.example.doicram.courses.db.entities.CourseWithCategories
+import com.example.doicram.courses.db.entities.CourseWithFullDetails
 import com.example.doicram.courses.db.entities.Courses
 import javax.inject.Inject
 
@@ -19,6 +20,10 @@ class CoursesRepositoryImpl @Inject constructor(
 
     override suspend fun getCourseById(courseId: Int): CourseWithCategories {
         return coursesDao.getCourseById(courseId)
+    }
+
+    override suspend fun getCourseWithFullDetails(courseId: Int): CourseWithFullDetails {
+        return coursesDao.getCourseWithFullDetails(courseId)
     }
 
     override suspend fun deleteCourse(course: Courses) {

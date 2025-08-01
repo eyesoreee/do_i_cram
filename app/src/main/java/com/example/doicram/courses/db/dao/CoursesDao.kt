@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.example.doicram.courses.db.entities.CourseWithCategories
+import com.example.doicram.courses.db.entities.CourseWithFullDetails
 import com.example.doicram.courses.db.entities.Courses
 
 @Dao
@@ -22,7 +23,11 @@ interface CoursesDao {
     @Query("SELECT * FROM courses WHERE id = :courseId")
     suspend fun getCourseById(courseId: Int): CourseWithCategories
 
+    // New method for getting full details
+    @Transaction
+    @Query("SELECT * FROM courses WHERE id = :courseId")
+    suspend fun getCourseWithFullDetails(courseId: Int): CourseWithFullDetails
+
     @Delete
     suspend fun deleteCourse(course: Courses)
-
 }

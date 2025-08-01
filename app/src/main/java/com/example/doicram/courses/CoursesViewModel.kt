@@ -54,6 +54,8 @@ class CoursesViewModel @Inject constructor(
         when (action) {
             is CoursesAction.AddCourse -> addCourseWithCategories(action.course, action.categories)
             is CoursesAction.DeleteCourse -> deleteCourse(action.course)
+            is CoursesAction.SelectCourse -> selectCourse(action.courseId)
+            is CoursesAction.DeselectCourse -> _state.update { it.copy(selectedCourse = null) }
         }
     }
 
@@ -90,6 +92,31 @@ class CoursesViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         error = "Failed to delete course: ${e.localizedMessage ?: "Unknown error"}"
+                    )
+                }
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun selectCourse(courseId: Int) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            try {
+                val selectedCourse = coursesRepository.getCourseWithFullDetails(courseId)
+                _state.update {
+                    it.copy(
+                        selectedCourse = selectedCourse,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+                loadCourses()
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Failed to select course: ${e.localizedMessage ?: "Unknown error"}"
                     )
                 }
                 e.printStackTrace()

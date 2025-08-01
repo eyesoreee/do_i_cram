@@ -23,7 +23,7 @@ data class Courses(
 
     @ColumnInfo(name = "passing_grade")
     val passingGrade: Double? = null,
-    
+
     @ColumnInfo(name = "grade")
     val grade: Double? = null,
 
@@ -31,5 +31,8 @@ data class Courses(
     val createdAt: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "archived_at")
+    val archivedAt: Long? = null
 )

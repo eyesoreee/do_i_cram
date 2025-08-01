@@ -48,7 +48,7 @@ fun CourseCard(
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             CourseCardHeader(course, onEdit, onDelete)
-            CourseDetails(course)
+            Details(course)
             Spacer(modifier = Modifier.height(20.dp))
             course.course.passingGrade?.let {
                 PassingGradeSection(it)
@@ -101,7 +101,7 @@ private fun CourseCardHeader(
 }
 
 @Composable
-private fun CourseDetails(course: CourseWithCategories) {
+private fun Details(course: CourseWithCategories) {
     Text(
         text = "${course.course.code}  •  ${course.course.units} units",
         style = MaterialTheme.typography.bodyMedium,

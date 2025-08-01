@@ -14,12 +14,14 @@ import androidx.compose.ui.unit.dp
 fun CourseTabList(
     courseTabs: List<CourseTab>,
     selectedTabIndex: Int,
-    onTabSelected: (Int) -> Unit
+    onTabSelected: (Int) -> Unit,
 ) {
     LazyRow(modifier = Modifier.fillMaxWidth()) {
         item {
             CourseTabButton(
-                onClick = { onTabSelected(-1) },
+                onClick = {
+                    onTabSelected(-1)
+                },
                 isSelected = selectedTabIndex == -1,
                 icon = Icons.Outlined.Settings,
                 text = "Manage Courses"

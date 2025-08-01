@@ -45,4 +45,7 @@ data class Assignments(
 
     @ColumnInfo(name = "updated_at")
     val updatedAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "archived_at")
+    val archivedAt: Long? = null
 )

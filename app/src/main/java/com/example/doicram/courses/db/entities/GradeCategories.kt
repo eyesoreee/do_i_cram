@@ -49,7 +49,10 @@ data class GradeCategories(
     val createdAt: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "archived_at")
+    val archivedAt: Long? = null
 ) {
     val color: Color
         get() = when (colorName) {
