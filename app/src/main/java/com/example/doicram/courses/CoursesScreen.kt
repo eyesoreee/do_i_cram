@@ -1,12 +1,15 @@
 package com.example.doicram.courses
 
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +17,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -59,6 +65,9 @@ fun CoursesScreen(
             )
         }
     }
+
+    var selectedDetailedTabIndex by remember { mutableIntStateOf(0) }
+    var showAddAssignmentDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier.fillMaxSize()
@@ -114,7 +123,111 @@ fun CoursesScreen(
 
             state.selectedCourse != null -> {
                 item {
-                    DetailedCourse(state.selectedCourse!!)
+                    CourseHeaderCard(state.selectedCourse!!)
+                }
+
+                item {
+                    CourseTab(
+                        selectedTabIndex = selectedDetailedTabIndex,
+                        tabs = listOf("Overview", "Assignments"),
+                        onTabSelected = { index ->
+                            selectedDetailedTabIndex = index
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+
+                if (selectedDetailedTabIndex == 0) {
+                    item {
+                        OverviewContent(state.selectedCourse!!)
+                    }
+                } else {
+                    item {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Assignment Manager",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            TextButton(
+                                onClick = {
+                                    showAddAssignmentDialog = showAddAssignmentDialog.not()
+                                },
+                                modifier = Modifier.border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.inverseSurface,
+                                    MaterialTheme.shapes.extraLarge
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.inverseSurface,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(2.dp))
+                                Text(
+                                    text = "Add Assignment",
+                                    color = MaterialTheme.colorScheme.inverseSurface
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+
+                    items(state.selectedCourse!!.categoriesWithAssignments) { it ->
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Text(text = it.category.name)
+                                    Text(text = "${it.assignments.size} Assignments")
+                                }
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                if (it.assignments.isEmpty()) {
+                                    Text(
+                                        text = "No assignments added yet",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                } else {
+                                    it.assignments.forEach { assignment ->
+                                        AssignmentCard(
+                                            assignment = assignment,
+                                            categoryColor = it.category.color,
+                                            onDeleteClick = {
+                                                Log.d("DELETE", "DELETING...")
+                                                viewModel.onAction(
+                                                    CoursesAction.DeleteAssignment(
+                                                        assignment
+                                                    )
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
 
@@ -127,7 +240,6 @@ fun CoursesScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // Row with "All courses" and "Add Course" button
                 item {
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -181,5 +293,15 @@ fun CoursesScreen(
             viewModel.onAction(CoursesAction.AddCourse(course, categories))
             showAddCourseDialog = false
         }
+    )
+
+    AddAssignmentDialog(
+        showDialog = showAddAssignmentDialog,
+        categories = state.selectedCourse?.categoriesWithAssignments ?: emptyList(),
+        onDismissRequest = { showAddAssignmentDialog = false },
+        onAddAssignment = { assignments ->
+            viewModel.onAction(CoursesAction.AddAssignment(assignments))
+            showAddAssignmentDialog = false
+        },
     )
 }

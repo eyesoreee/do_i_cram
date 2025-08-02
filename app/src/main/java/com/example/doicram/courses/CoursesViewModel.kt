@@ -2,8 +2,10 @@ package com.example.doicram.courses
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.doicram.courses.db.entities.Assignments
 import com.example.doicram.courses.db.entities.Courses
 import com.example.doicram.courses.db.entities.GradeCategories
+import com.example.doicram.courses.db.repo.AssignmentsRepository
 import com.example.doicram.courses.db.repo.CoursesRepository
 import com.example.doicram.courses.db.repo.GradeCategoriesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CoursesViewModel @Inject constructor(
     private val coursesRepository: CoursesRepository,
-    private val categoriesRepository: GradeCategoriesRepository  // Add this
+    private val categoriesRepository: GradeCategoriesRepository,
+    private val assignmentsRepository: AssignmentsRepository
 ) : ViewModel() {
     private val _state: MutableStateFlow<CoursesState> = MutableStateFlow(CoursesState())
     val state: StateFlow<CoursesState> = _state.asStateFlow()
@@ -56,6 +59,8 @@ class CoursesViewModel @Inject constructor(
             is CoursesAction.DeleteCourse -> deleteCourse(action.course)
             is CoursesAction.SelectCourse -> selectCourse(action.courseId)
             is CoursesAction.DeselectCourse -> _state.update { it.copy(selectedCourse = null) }
+            is CoursesAction.AddAssignment -> addAssignment(action.assignment)
+            is CoursesAction.DeleteAssignment -> deleteAssignment(action.assignment)
         }
     }
 
@@ -117,6 +122,73 @@ class CoursesViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         error = "Failed to select course: ${e.localizedMessage ?: "Unknown error"}"
+                    )
+                }
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun addAssignment(assignment: Assignments) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            try {
+                assignmentsRepository.addAssignment(assignment)
+                refreshAssignment()
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Failed to add assignment: ${e.localizedMessage ?: "Unknown error"}"
+                    )
+                }
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun deleteAssignment(assignment: Assignments) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            try {
+                assignmentsRepository.deleteAssignment(assignment)
+                refreshAssignment()
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Failed to delete assignment: ${e.localizedMessage ?: "Unknown error"}"
+                    )
+                }
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun refreshAssignment() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            try {
+                val currentSelectedCourseId = _state.value.selectedCourse?.course?.id
+                val fetchedCourses = coursesRepository.getCourses()
+
+                val updatedSelectedCourse = if (currentSelectedCourseId != null) {
+                    coursesRepository.getCourseWithFullDetails(currentSelectedCourseId)
+                } else null
+
+                _state.update {
+                    it.copy(
+                        courses = fetchedCourses,
+                        selectedCourse = updatedSelectedCourse,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Failed to refresh: ${e.localizedMessage ?: "Unknown error"}"
                     )
                 }
                 e.printStackTrace()
