@@ -9,7 +9,8 @@ sealed interface CoursesAction {
     data class DeleteCourse(val course: Courses) : CoursesAction
     data class SelectCourse(val courseId: Int) : CoursesAction
     data object DeselectCourse : CoursesAction
+
     data class AddAssignment(val assignment: Assignments) : CoursesAction
     data class DeleteAssignment(val assignment: Assignments) : CoursesAction
-
+    data class UpdateAssignment(val updatedAssignment: Assignments) : CoursesAction
 }

@@ -29,4 +29,8 @@ class CoursesRepositoryImpl @Inject constructor(
     override suspend fun deleteCourse(course: Courses) {
         coursesDao.deleteCourse(course)
     }
+
+    override suspend fun updateCourse(course: Courses) {
+        coursesDao.updateCourse(course)
+    }
 }

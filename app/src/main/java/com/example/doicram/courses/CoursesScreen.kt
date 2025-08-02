@@ -38,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.doicram.Loading
 import com.example.doicram.PageHeader
+import com.example.doicram.courses.db.entities.Assignments
 
 data class CourseTab(
     val icon: ImageVector,
@@ -68,6 +69,9 @@ fun CoursesScreen(
 
     var selectedDetailedTabIndex by remember { mutableIntStateOf(0) }
     var showAddAssignmentDialog by remember { mutableStateOf(false) }
+
+    var showEditAssignmentDialog by remember { mutableStateOf(false) }
+    var assignmentToEdit by remember { mutableStateOf<Assignments?>(null) }
 
     LazyColumn(
         modifier = modifier.fillMaxSize()
@@ -219,6 +223,10 @@ fun CoursesScreen(
                                                         assignment
                                                     )
                                                 )
+                                            },
+                                            onEditClick = { assignment ->
+                                                assignmentToEdit = assignment
+                                                showEditAssignmentDialog = true
                                             }
                                         )
                                     }
@@ -303,5 +311,20 @@ fun CoursesScreen(
             viewModel.onAction(CoursesAction.AddAssignment(assignments))
             showAddAssignmentDialog = false
         },
+    )
+
+    EditAssignmentDialog(
+        showDialog = showEditAssignmentDialog,
+        assignment = assignmentToEdit,
+        categories = state.selectedCourse?.categoriesWithAssignments ?: emptyList(),
+        onDismissRequest = {
+            showEditAssignmentDialog = false
+            assignmentToEdit = null
+        },
+        onEditAssignment = { updatedAssignment ->
+            viewModel.onAction(CoursesAction.UpdateAssignment(updatedAssignment))
+            showEditAssignmentDialog = false
+            assignmentToEdit = null
+        }
     )
 }

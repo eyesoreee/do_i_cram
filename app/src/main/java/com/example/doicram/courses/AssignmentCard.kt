@@ -40,9 +40,16 @@ import java.util.Locale
 fun AssignmentCard(
     assignment: Assignments,
     categoryColor: Color,
-    onEditClick: () -> Unit = {},
+    onEditClick: (Assignments) -> Unit = {},
     onDeleteClick: (Assignments) -> Unit = {}
 ) {
+    val score = "${assignment.score ?: "???"}/${assignment.maxScore}"
+    val percentage = if (assignment.score != null) {
+        "${(assignment.score.toDouble() / assignment.maxScore.toDouble()) * 100}%"
+    } else {
+        "N/A"
+    }
+
     val formattedDate = assignment.dueDate?.let { date ->
         SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(
             Date(date)
@@ -119,13 +126,13 @@ fun AssignmentCard(
 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = "${assignment.score ?: 0}/${assignment.maxScore}",
+                        text = score,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "${(assignment.score ?: 0) / assignment.maxScore}%",
+                        text = "$percentage",
                         color = Color(0xFF4CAF50),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
@@ -157,7 +164,7 @@ fun AssignmentCard(
                 Spacer(modifier = Modifier.weight(1f))
 
                 IconButton(
-                    onClick = onEditClick,
+                    onClick = { onEditClick(assignment) },
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(

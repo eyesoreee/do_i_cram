@@ -37,7 +37,7 @@ data class GradeCategories(
     val weight: Double,
 
     @ColumnInfo(name = "current_grade")
-    val currentGrade: Double = 0.0,
+    val currentGrade: Double? = null,
 
     @ColumnInfo(name = "target_grade")
     val targetGrade: Double? = null,

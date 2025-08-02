@@ -20,7 +20,8 @@ import javax.inject.Inject
 class CoursesViewModel @Inject constructor(
     private val coursesRepository: CoursesRepository,
     private val categoriesRepository: GradeCategoriesRepository,
-    private val assignmentsRepository: AssignmentsRepository
+    private val assignmentsRepository: AssignmentsRepository,
+    private val gradeCalculationService: GradeCalculationService
 ) : ViewModel() {
     private val _state: MutableStateFlow<CoursesState> = MutableStateFlow(CoursesState())
     val state: StateFlow<CoursesState> = _state.asStateFlow()
@@ -61,6 +62,7 @@ class CoursesViewModel @Inject constructor(
             is CoursesAction.DeselectCourse -> _state.update { it.copy(selectedCourse = null) }
             is CoursesAction.AddAssignment -> addAssignment(action.assignment)
             is CoursesAction.DeleteAssignment -> deleteAssignment(action.assignment)
+            is CoursesAction.UpdateAssignment -> updateAssignment(action.updatedAssignment)
         }
     }
 
@@ -134,6 +136,11 @@ class CoursesViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, error = null) }
             try {
                 assignmentsRepository.addAssignment(assignment)
+
+                if (assignment.score != null) {
+                    gradeCalculationService.recalculateGradesForCategory(assignment.categoryId)
+                }
+
                 refreshAssignment()
             } catch (e: Exception) {
                 _state.update {
@@ -152,6 +159,32 @@ class CoursesViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, error = null) }
             try {
                 assignmentsRepository.deleteAssignment(assignment)
+                gradeCalculationService.recalculateGradesForCategory(assignment.categoryId)
+                refreshAssignment()
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Failed to delete assignment: ${e.localizedMessage ?: "Unknown error"}"
+                    )
+                }
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun updateAssignment(assignment: Assignments) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            try {
+                val oldAssignment = assignmentsRepository.getAssignmentById(assignment.id)
+                assignmentsRepository.updateAssignment(assignment)
+
+                val scoreChanged = oldAssignment?.score != assignment.score
+                if (scoreChanged) {
+                    gradeCalculationService.recalculateGradesForCategory(assignment.categoryId)
+                }
+
                 refreshAssignment()
             } catch (e: Exception) {
                 _state.update {

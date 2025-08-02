@@ -10,4 +10,5 @@ interface CoursesRepository {
     suspend fun getCourseById(courseId: Int): CourseWithCategories
     suspend fun getCourseWithFullDetails(courseId: Int): CourseWithFullDetails
     suspend fun deleteCourse(course: Courses)
+    suspend fun updateCourse(course: Courses)
 }

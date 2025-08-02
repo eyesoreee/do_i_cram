@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.example.doicram.courses.db.entities.CourseWithCategories
 import com.example.doicram.courses.db.entities.CourseWithFullDetails
 import com.example.doicram.courses.db.entities.Courses
@@ -30,4 +31,7 @@ interface CoursesDao {
 
     @Delete
     suspend fun deleteCourse(course: Courses)
+
+    @Update
+    suspend fun updateCourse(course: Courses)
 }
