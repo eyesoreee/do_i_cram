@@ -35,6 +35,7 @@ import com.example.doicram.courses.db.entities.Assignments
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.round
 
 @Composable
 fun AssignmentCard(
@@ -45,7 +46,9 @@ fun AssignmentCard(
 ) {
     val score = "${assignment.score ?: "???"}/${assignment.maxScore}"
     val percentage = if (assignment.score != null) {
-        "${(assignment.score.toDouble() / assignment.maxScore.toDouble()) * 100}%"
+        val percentageValue = (assignment.score.toDouble() / assignment.maxScore.toDouble()) * 100
+        val rounded = round(percentageValue * 100.0) / 100.0
+        rounded
     } else {
         "N/A"
     }
@@ -132,7 +135,7 @@ fun AssignmentCard(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "$percentage",
+                        text = "$percentage%",
                         color = Color(0xFF4CAF50),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium

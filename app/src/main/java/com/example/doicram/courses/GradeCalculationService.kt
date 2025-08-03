@@ -5,6 +5,7 @@ import com.example.doicram.courses.db.repo.CoursesRepository
 import com.example.doicram.courses.db.repo.GradeCategoriesRepository
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.round
 
 @Singleton
 class GradeCalculationService @Inject constructor(
@@ -50,15 +51,17 @@ class GradeCalculationService @Inject constructor(
             return null
         }
 
-        val totalScore = gradedAssignments.sumOf { it.score!! }
+        val totalScore = gradedAssignments.sumOf { it.score!!.toDouble() }
         val totalMaxScore = gradedAssignments.sumOf { it.maxScore }
 
         return if (totalMaxScore > 0) {
-            (totalScore.toDouble() / totalMaxScore.toDouble()) * 100.0
+            val grade = (totalScore / totalMaxScore.toDouble()) * 100.0
+            round(grade * 100.0) / 100.0
         } else {
             null
         }
     }
+
 
     private suspend fun calculateCourseGrade(courseId: Int): Double? {
         val categories = categoriesRepository.getCategoriesForCourse(courseId)
@@ -69,13 +72,12 @@ class GradeCalculationService @Inject constructor(
             return null
         }
 
-        val totalWeightedScore = gradedCategories.sumOf {
-            it.currentGrade!! * it.weight
-        }
+        val totalWeightedScore = gradedCategories.sumOf { it.currentGrade!! * it.weight }
         val totalWeight = gradedCategories.sumOf { it.weight }
 
         return if (totalWeight > 0) {
-            totalWeightedScore / totalWeight
+            val grade = totalWeightedScore / totalWeight
+            round(grade * 100.0) / 100.0
         } else {
             null
         }

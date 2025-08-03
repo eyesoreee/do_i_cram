@@ -56,13 +56,13 @@ data class GradeCategories(
 ) {
     val color: Color
         get() = when (colorName) {
-            CategoryColor.RED -> Color.Red
-            CategoryColor.GREEN -> Color.Green
-            CategoryColor.BLUE -> Color.Blue
-            CategoryColor.ORANGE -> Color(0xFFFF9800)
-            CategoryColor.PURPLE -> Color(0xFF9C27B0)
-            CategoryColor.TEAL -> Color(0xFF009688)
-            CategoryColor.PINK -> Color(0xFFE91E63)
-            CategoryColor.INDIGO -> Color(0xFF3F51B5)
+            CategoryColor.RED -> Color(0xFFD32F2F)
+            CategoryColor.GREEN -> Color(0xFF388E3C)
+            CategoryColor.BLUE -> Color(0xFF1976D2)
+            CategoryColor.ORANGE -> Color(0xFFF57C00)
+            CategoryColor.PURPLE -> Color(0xFF7B1FA2)
+            CategoryColor.TEAL -> Color(0xFF00796B)
+            CategoryColor.PINK -> Color(0xFFC2185B)
+            CategoryColor.INDIGO -> Color(0xFF303F9F)
         }
 }

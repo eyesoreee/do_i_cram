@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.example.doicram"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.doicram"
@@ -71,4 +71,6 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+
+    implementation(libs.vico.compose.m3)
 }
