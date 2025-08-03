@@ -37,18 +37,9 @@ import com.example.doicram.ChartData
 import com.example.doicram.PieChart
 import com.example.doicram.courses.db.entities.CategoryWithAssignments
 import com.example.doicram.courses.db.entities.CourseWithFullDetails
-import kotlin.math.round
 
 @Composable
 fun CourseHeaderCard(course: CourseWithFullDetails) {
-    val grade = if (course.course.grade != null) {
-        val percentageValue = (course.course.grade / course.course.grade) * 100
-        val rounded = round(percentageValue * 100.0) / 100.0
-        "$rounded%"
-    } else {
-        "N/A"
-    }
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -90,7 +81,7 @@ fun CourseHeaderCard(course: CourseWithFullDetails) {
 
                 CourseInfoChip(
                     label = "GRADE",
-                    value = grade,
+                    value = if (course.course.grade != null) "${course.course.grade}%" else "N/A",
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -193,7 +184,7 @@ fun OverviewContent(course: CourseWithFullDetails) {
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         OverallGradeCard(
-            grade = course.course.grade ?: 0.0,
+            grade = course.course.grade,
             progress = progress
         )
         CategoriesPerformance(data = categoryPerformance, isGraded = course.course.grade != null)
@@ -207,7 +198,7 @@ fun OverviewContent(course: CourseWithFullDetails) {
 
 @Composable
 private fun OverallGradeCard(
-    grade: Double,
+    grade: Double?,
     progress: Float
 ) {
     Card(
@@ -227,7 +218,7 @@ private fun OverallGradeCard(
                     modifier = Modifier.alignByBaseline()
                 )
                 Text(
-                    text = "$grade%",
+                    text = if (grade != null) "${grade}%" else "N/A",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.alignByBaseline()

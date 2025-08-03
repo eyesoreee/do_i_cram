@@ -27,7 +27,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun EmptyCourseList(onClick: () -> Unit) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(

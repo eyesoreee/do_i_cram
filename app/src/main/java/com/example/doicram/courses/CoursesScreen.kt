@@ -1,6 +1,5 @@
 package com.example.doicram.courses
 
-import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -39,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.doicram.Loading
 import com.example.doicram.PageHeader
 import com.example.doicram.courses.db.entities.Assignments
+import com.example.doicram.courses.db.entities.Courses
 
 data class CourseTab(
     val icon: ImageVector,
@@ -73,9 +73,13 @@ fun CoursesScreen(
     var showEditAssignmentDialog by remember { mutableStateOf(false) }
     var assignmentToEdit by remember { mutableStateOf<Assignments?>(null) }
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize()
-    ) {
+    var showDeleteCourseDialog by remember { mutableStateOf(false) }
+    var courseToDelete by remember { mutableStateOf<Courses?>(null) }
+
+    var showDeleteAssignmentDialog by remember { mutableStateOf(false) }
+    var assignmentToDelete by remember { mutableStateOf<Assignments?>(null) }
+
+    LazyColumn(modifier = modifier.fillMaxSize()) {
         // First PageHeader
         item {
             PageHeader(
@@ -101,6 +105,50 @@ fun CoursesScreen(
                 },
             )
             Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (selectedTabIndex == -1) {
+            item {
+                PageHeader(
+                    title = "Course Management",
+                    subtitle = "Add, edit, and configure your courses and grading categories."
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "All courses",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    TextButton(
+                        onClick = { showAddCourseDialog = showAddCourseDialog.not() },
+                        modifier = Modifier.border(
+                            1.dp,
+                            MaterialTheme.colorScheme.inverseSurface,
+                            MaterialTheme.shapes.extraLarge
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.inverseSurface,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = "Add Course",
+                            color = MaterialTheme.colorScheme.inverseSurface
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+            }
         }
 
         when {
@@ -216,13 +264,9 @@ fun CoursesScreen(
                                         AssignmentCard(
                                             assignment = assignment,
                                             categoryColor = it.category.color,
-                                            onDeleteClick = {
-                                                Log.d("DELETE", "DELETING...")
-                                                viewModel.onAction(
-                                                    CoursesAction.DeleteAssignment(
-                                                        assignment
-                                                    )
-                                                )
+                                            onDeleteClick = { assignment ->
+                                                assignmentToDelete = assignment
+                                                showDeleteAssignmentDialog = true
                                             },
                                             onEditClick = { assignment ->
                                                 assignmentToEdit = assignment
@@ -240,53 +284,16 @@ fun CoursesScreen(
             }
 
             else -> {
-                item {
-                    PageHeader(
-                        title = "Course Management",
-                        subtitle = "Add, edit, and configure your courses and grading categories."
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
 
-                item {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "All courses",
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        TextButton(
-                            onClick = { showAddCourseDialog = showAddCourseDialog.not() },
-                            modifier = Modifier.border(
-                                1.dp,
-                                MaterialTheme.colorScheme.inverseSurface,
-                                MaterialTheme.shapes.extraLarge
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.inverseSurface,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(2.dp))
-                            Text(
-                                text = "Add Course",
-                                color = MaterialTheme.colorScheme.inverseSurface
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
 
                 items(state.courses) { course ->
                     CourseCard(
                         course = course,
                         onEdit = { },
-                        onDelete = { viewModel.onAction(CoursesAction.DeleteCourse(course.course)) }
+                        onDelete = { course ->
+                            courseToDelete = course
+                            showDeleteCourseDialog = true
+                        }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -325,6 +332,30 @@ fun CoursesScreen(
             viewModel.onAction(CoursesAction.UpdateAssignment(updatedAssignment))
             showEditAssignmentDialog = false
             assignmentToEdit = null
+        }
+    )
+
+    DeleteCourseDialog(
+        showDialog = showDeleteCourseDialog,
+        onDismissRequest = { showDeleteCourseDialog = showDeleteCourseDialog.not() },
+        onDelete = {
+            courseToDelete.let {
+                viewModel.onAction(CoursesAction.DeleteCourse(courseToDelete!!))
+            }
+            showDeleteCourseDialog = false
+            courseToDelete = null
+        }
+    )
+
+    DeleteAssignmentDialog(
+        showDialog = showDeleteAssignmentDialog,
+        onDismissRequest = { showDeleteAssignmentDialog = showDeleteAssignmentDialog.not() },
+        onDelete = {
+            assignmentToDelete.let {
+                viewModel.onAction(CoursesAction.DeleteAssignment(assignmentToDelete!!))
+            }
+            showDeleteAssignmentDialog = false
+            assignmentToDelete = null
         }
     )
 }
