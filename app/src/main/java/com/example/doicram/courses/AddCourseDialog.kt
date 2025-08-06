@@ -8,9 +8,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -22,8 +25,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,59 +49,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.doicram.courses.db.entities.CategoryColor
-import com.example.doicram.courses.db.entities.Courses
-import com.example.doicram.courses.db.entities.GradeCategories
+import com.example.doicram.db.entities.Courses
+import com.example.doicram.db.entities.GradeCategories
+import com.example.doicram.db.entities.GradeScale
+
+data class TabItem(
+    val title: String,
+    val onClick: () -> Unit
+)
 
 @Composable
 fun AddCourseDialog(
     showDialog: Boolean,
     onDismissRequest: () -> Unit,
-    onAddCourse: (Courses, List<GradeCategories>) -> Unit
+    onAddCourse: (Courses, List<GradeCategories>, List<GradeScale>) -> Unit
 ) {
     if (showDialog) {
         var selectedTabIndex by remember { mutableIntStateOf(0) }
         var courseName by remember { mutableStateOf("") }
         var courseCode by remember { mutableStateOf("") }
         var courseUnits by remember { mutableStateOf("") }
-        var coursePassingGrade by remember { mutableStateOf("") }
-        var categories by remember {
-            mutableStateOf(
-                listOf(
-                    GradeCategories(
-                        courseId = 0,
-                        name = "Preliminary Exam",
-                        weight = 20.0,
-                        colorName = CategoryColor.BLUE
-                    ),
-                    GradeCategories(
-                        courseId = 0,
-                        name = "Midterm Exam",
-                        weight = 20.0,
-                        colorName = CategoryColor.GREEN
-                    ),
-                    GradeCategories(
-                        courseId = 0,
-                        name = "Final Exam",
-                        weight = 20.0,
-                        colorName = CategoryColor.RED
-                    ),
-                    GradeCategories(
-                        courseId = 0,
-                        name = "Project",
-                        weight = 25.0,
-                        colorName = CategoryColor.PURPLE
-                    ),
-                    GradeCategories(
-                        courseId = 0,
-                        name = "Activities and Quizzes",
-                        weight = 15.0,
-                        colorName = CategoryColor.ORANGE
+        var courseTargetGrade by remember { mutableStateOf("") }
+        var categories by remember { mutableStateOf(GradeCategories.getDefaultCategories()) }
 
-                    )
-                )
+        val tabs = remember {
+            listOf(
+                TabItem("Basic Info") { selectedTabIndex = 0 },
+                TabItem("Categories") { selectedTabIndex = 1 },
+                TabItem("Scales") { selectedTabIndex = 2 }
             )
         }
+
+        var scales by remember { mutableStateOf(GradeScale.getDefaultScale()) }
 
         val isFormValid =
             courseName.isNotBlank() && courseCode.isNotBlank() && courseUnits.isNotBlank()
@@ -133,28 +113,19 @@ fun AddCourseDialog(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
                     ) {
-                        Tab(
-                            selected = selectedTabIndex == 0,
-                            onClick = { selectedTabIndex = 0 },
-                            text = {
-                                Text(
-                                    "Basic Info",
-                                    fontWeight = if (selectedTabIndex == 0) FontWeight.SemiBold else FontWeight.Normal
-                                )
-                            },
-                            modifier = Modifier.padding(vertical = 12.dp)
-                        )
-                        Tab(
-                            selected = selectedTabIndex == 1,
-                            onClick = { selectedTabIndex = 1 },
-                            text = {
-                                Text(
-                                    "Categories",
-                                    fontWeight = if (selectedTabIndex == 1) FontWeight.SemiBold else FontWeight.Normal
-                                )
-                            },
-                            modifier = Modifier.padding(vertical = 12.dp)
-                        )
+                        tabs.forEachIndexed { index, tab ->
+                            Tab(
+                                selected = selectedTabIndex == index,
+                                onClick = tab.onClick,
+                                text = {
+                                    Text(
+                                        text = tab.title,
+                                        fontWeight = if (selectedTabIndex == index) FontWeight.SemiBold else FontWeight.Normal
+                                    )
+                                },
+                                modifier = Modifier.padding(vertical = 12.dp)
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -226,9 +197,9 @@ fun AddCourseDialog(
                                     shape = RoundedCornerShape(8.dp)
                                 )
                                 OutlinedTextField(
-                                    value = coursePassingGrade,
+                                    value = courseTargetGrade,
                                     onValueChange = { it ->
-                                        coursePassingGrade = it.filter { it.isDigit() }
+                                        courseTargetGrade = it.filter { it.isDigit() }
                                     },
                                     label = {
                                         Text(
@@ -286,63 +257,69 @@ fun AddCourseDialog(
 
                                 Spacer(modifier = Modifier.height(16.dp))
 
-                                categories.forEach { category ->
-                                    Card(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 4.dp),
-                                        colors = CardDefaults.cardColors(
-                                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                                                alpha = 0.3f
-                                            )
-                                        ),
-                                        shape = RoundedCornerShape(12.dp)
-                                    ) {
-                                        Row(
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(max = 350.dp)
+                                ) {
+                                    items(categories) { category ->
+                                        Card(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(16.dp),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
+                                                .padding(vertical = 4.dp),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                                                    alpha = 0.3f
+                                                )
+                                            ),
+                                            shape = RoundedCornerShape(12.dp)
                                         ) {
                                             Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.weight(1f)
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .size(12.dp)
-                                                        .background(
-                                                            category.color,
-                                                            shape = CircleShape
-                                                        )
-                                                )
-                                                Spacer(modifier = Modifier.width(12.dp))
-                                                Text(
-                                                    category.name,
-                                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                                        fontWeight = FontWeight.Medium
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier.weight(1f)
+                                                ) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(12.dp)
+                                                            .background(
+                                                                category.color,
+                                                                shape = CircleShape
+                                                            )
                                                     )
-                                                )
-                                            }
-                                            Text(
-                                                "${category.weight.toInt()}%",
-                                                style = MaterialTheme.typography.bodyMedium.copy(
-                                                    fontWeight = FontWeight.SemiBold
-                                                ),
-                                                color = MaterialTheme.colorScheme.primary
-                                            )
-                                            IconButton(
-                                                onClick = {
-                                                    categories =
-                                                        categories.filter { it != category }
+                                                    Spacer(modifier = Modifier.width(12.dp))
+                                                    Text(
+                                                        category.name,
+                                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                                            fontWeight = FontWeight.Medium
+                                                        )
+                                                    )
                                                 }
-                                            ) {
-                                                Icon(
-                                                    Icons.Default.Delete,
-                                                    contentDescription = "Delete",
-                                                    tint = MaterialTheme.colorScheme.error
+                                                Text(
+                                                    "${category.weight.toInt()}%",
+                                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                                        fontWeight = FontWeight.SemiBold
+                                                    ),
+                                                    color = MaterialTheme.colorScheme.primary
                                                 )
+                                                IconButton(
+                                                    onClick = {
+                                                        categories =
+                                                            categories.filter { it != category }
+                                                    }
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.Delete,
+                                                        contentDescription = "Delete",
+                                                        tint = MaterialTheme.colorScheme.error
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -383,6 +360,200 @@ fun AddCourseDialog(
                                 }
                             }
                         }
+
+                        2 -> {
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        "Grade Scales",
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    )
+                                    Text(
+                                        "${scales.size} scales",
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontWeight = FontWeight.Medium
+                                        ),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(max = 350.dp)
+                                ) {
+                                    items(scales) { scale ->
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 4.dp),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                                                    alpha = 0.3f
+                                                )
+                                            ),
+                                            shape = RoundedCornerShape(12.dp)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Column(
+                                                    modifier = Modifier.weight(1f)
+                                                ) {
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        // GPA indicator
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .size(12.dp)
+                                                                .background(
+                                                                    when {
+                                                                        scale.gpaValue <= 1.5 -> Color(
+                                                                            0xFF4CAF50
+                                                                        )
+
+                                                                        scale.gpaValue <= 2.5 -> Color(
+                                                                            0xFFFF9800
+                                                                        )
+
+                                                                        scale.gpaValue < 5.0 -> Color(
+                                                                            0xFFF44336
+                                                                        )
+
+                                                                        else -> Color(0xFF9E9E9E)
+                                                                    },
+                                                                    shape = CircleShape
+                                                                )
+                                                        )
+                                                        Spacer(modifier = Modifier.width(12.dp))
+                                                        Text(
+                                                            "${scale.minPercentage.toInt()}% - ${scale.maxPercentage.toInt()}%",
+                                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                                fontWeight = FontWeight.Medium
+                                                            )
+                                                        )
+                                                    }
+                                                    Spacer(modifier = Modifier.height(4.dp))
+                                                    Row {
+                                                        Text(
+                                                            "GPA: ${scale.gpaValue}",
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                        )
+                                                        scale.letterGrade?.let { letter ->
+                                                            Text(
+                                                                " • $letter",
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                            )
+                                                        }
+                                                        scale.description?.let { desc ->
+                                                            Text(
+                                                                " • $desc",
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                            )
+                                                        }
+                                                    }
+                                                }
+
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .background(
+                                                                if (scale.isPassing)
+                                                                    MaterialTheme.colorScheme.primaryContainer
+                                                                else
+                                                                    MaterialTheme.colorScheme.errorContainer,
+                                                                shape = RoundedCornerShape(12.dp)
+                                                            )
+                                                            .padding(
+                                                                horizontal = 8.dp,
+                                                                vertical = 4.dp
+                                                            )
+                                                    ) {
+                                                        Text(
+                                                            if (scale.isPassing) "Pass" else "Fail",
+                                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                                fontWeight = FontWeight.Medium
+                                                            ),
+                                                            color = if (scale.isPassing)
+                                                                MaterialTheme.colorScheme.onPrimaryContainer
+                                                            else
+                                                                MaterialTheme.colorScheme.onErrorContainer
+                                                        )
+                                                    }
+
+                                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                                    IconButton(
+                                                        onClick = {
+                                                            scales = scales.filter { it != scale }
+                                                        }
+                                                    ) {
+                                                        Icon(
+                                                            Icons.Default.Delete,
+                                                            contentDescription = "Delete",
+                                                            tint = MaterialTheme.colorScheme.error
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                var showAddScaleDialog by remember { mutableStateOf(false) }
+
+                                Button(
+                                    onClick = { showAddScaleDialog = true },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    ),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Add,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        "Add Scale",
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+
+                                if (showAddScaleDialog) {
+                                    AddScaleDialog(
+                                        onDismiss = { showAddScaleDialog = false },
+                                        onAddScale = { newScale ->
+                                            scales = scales + newScale
+                                            showAddScaleDialog = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -394,9 +565,9 @@ fun AddCourseDialog(
                                 name = courseName,
                                 code = courseCode,
                                 units = courseUnits.toInt(),
-                                passingGrade = coursePassingGrade.toDoubleOrNull()
+                                targetGrade = courseTargetGrade.toDoubleOrNull()
                             )
-                            onAddCourse(course, categories)
+                            onAddCourse(course, categories, scales)
                         }
                     },
                     enabled = isFormValid,
@@ -426,199 +597,4 @@ fun AddCourseDialog(
             shape = RoundedCornerShape(16.dp)
         )
     }
-}
-
-@Composable
-fun AddCategoryDialog(
-    onDismiss: () -> Unit,
-    onAddCategory: (GradeCategories) -> Unit
-) {
-    var categoryName by remember { mutableStateOf("") }
-    var categoryWeight by remember { mutableStateOf("") }
-    var selectedColor by remember { mutableStateOf(CategoryColor.BLUE) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                "Add Category",
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Medium
-                )
-            )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                OutlinedTextField(
-                    value = categoryName,
-                    onValueChange = { categoryName = it },
-                    label = {
-                        Text(
-                            "Category Name",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Medium
-                            )
-                        )
-                    },
-                    placeholder = { Text("e.g., Exams") },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                )
-                OutlinedTextField(
-                    value = categoryWeight,
-                    onValueChange = { it ->
-                        categoryWeight = it.filter { it.isDigit() || it == '.' }
-                    },
-                    label = {
-                        Text(
-                            "Weight (%)",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Medium
-                            )
-                        )
-                    },
-                    placeholder = { Text("40") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                )
-
-                // Enhanced color picker
-                Column {
-                    Text(
-                        "Color",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.Medium
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    var expanded by remember { mutableStateOf(false) }
-                    Box {
-                        Card(
-                            onClick = { expanded = true },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                            ),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .background(
-                                            when (selectedColor) {
-                                                CategoryColor.RED -> Color.Red
-                                                CategoryColor.GREEN -> Color.Green
-                                                CategoryColor.BLUE -> Color.Blue
-                                                CategoryColor.ORANGE -> Color(0xFFFF9800)
-                                                CategoryColor.PURPLE -> Color(0xFF9C27B0)
-                                                CategoryColor.TEAL -> Color(0xFF009688)
-                                                CategoryColor.PINK -> Color(0xFFE91E63)
-                                                CategoryColor.INDIGO -> Color(0xFF3F51B5)
-                                            },
-                                            shape = CircleShape
-                                        )
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(
-                                    selectedColor.name,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        }
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            CategoryColor.entries.forEach { color ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(16.dp)
-                                                    .background(
-                                                        when (color) {
-                                                            CategoryColor.RED -> Color.Red
-                                                            CategoryColor.GREEN -> Color.Green
-                                                            CategoryColor.BLUE -> Color.Blue
-                                                            CategoryColor.ORANGE -> Color(0xFFFF9800)
-                                                            CategoryColor.PURPLE -> Color(0xFF9C27B0)
-                                                            CategoryColor.TEAL -> Color(0xFF009688)
-                                                            CategoryColor.PINK -> Color(0xFFE91E63)
-                                                            CategoryColor.INDIGO -> Color(0xFF3F51B5)
-                                                        },
-                                                        shape = CircleShape
-                                                    )
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Text(color.name)
-                                        }
-                                    },
-                                    onClick = {
-                                        selectedColor = color
-                                        expanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    if (categoryName.isNotBlank() && categoryWeight.isNotBlank()) {
-                        val weight = categoryWeight.toDoubleOrNull()
-                        if (weight != null) {
-                            val newCategory = GradeCategories(
-                                name = categoryName,
-                                weight = weight,
-                                colorName = selectedColor,
-                                courseId = 0,
-                            )
-                            onAddCategory(newCategory)
-                        }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    "Add",
-                    fontWeight = FontWeight.Medium
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            ) {
-                Text("Cancel")
-            }
-        },
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(16.dp)
-    )
 }

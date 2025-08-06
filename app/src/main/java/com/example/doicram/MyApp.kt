@@ -17,6 +17,6 @@ class MyApp : Application() {
             applicationContext,
             AppDatabase::class.java,
             "do_i_cram.db"
-        ).build()
+        ).fallbackToDestructiveMigration(true).build()
     }
 }

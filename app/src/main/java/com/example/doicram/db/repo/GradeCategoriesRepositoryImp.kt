@@ -1,15 +1,18 @@
-package com.example.doicram.courses.db.repo
+package com.example.doicram.db.repo
 
-import com.example.doicram.courses.db.dao.GradeCategoriesDao
-import com.example.doicram.courses.db.entities.GradeCategories
+import com.example.doicram.db.dao.GradeCategoriesDao
+import com.example.doicram.db.entities.GradeCategories
 import javax.inject.Inject
 
 class GradeCategoriesRepositoryImpl @Inject constructor(
     private val gradeCategoriesDao: GradeCategoriesDao
 ) : GradeCategoriesRepository {
+    override suspend fun addCategory(category: GradeCategories): Long {
+        return gradeCategoriesDao.addCategory(category)
+    }
 
-    override suspend fun addCategory(category: GradeCategories) {
-        gradeCategoriesDao.addCategory(category)
+    override suspend fun addCategories(categories: List<GradeCategories>): List<Long> {
+        return gradeCategoriesDao.addCategories(categories)
     }
 
     override suspend fun updateCategory(category: GradeCategories) {

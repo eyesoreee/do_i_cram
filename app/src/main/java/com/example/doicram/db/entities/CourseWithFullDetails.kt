@@ -1,4 +1,4 @@
-package com.example.doicram.courses.db.entities
+package com.example.doicram.db.entities
 
 import androidx.room.Embedded
 import androidx.room.Relation
@@ -10,5 +10,8 @@ data class CourseWithFullDetails(
         parentColumn = "id",
         entityColumn = "course_id"
     )
-    val categoriesWithAssignments: List<CategoryWithAssignments>
+    val categoriesWithAssignments: List<CategoryWithAssignments>,
+    @Relation(parentColumn = "id", entityColumn = "course_id")
+    val gradeScales: List<GradeScale>
 )
+

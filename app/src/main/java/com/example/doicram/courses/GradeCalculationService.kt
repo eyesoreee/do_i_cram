@@ -1,8 +1,8 @@
 package com.example.doicram.courses
 
-import com.example.doicram.courses.db.repo.AssignmentsRepository
-import com.example.doicram.courses.db.repo.CoursesRepository
-import com.example.doicram.courses.db.repo.GradeCategoriesRepository
+import com.example.doicram.db.repo.AssignmentsRepository
+import com.example.doicram.db.repo.CoursesRepository
+import com.example.doicram.db.repo.GradeCategoriesRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.round

@@ -2,12 +2,14 @@ package com.example.doicram.courses
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.doicram.courses.db.entities.Assignments
-import com.example.doicram.courses.db.entities.Courses
-import com.example.doicram.courses.db.entities.GradeCategories
-import com.example.doicram.courses.db.repo.AssignmentsRepository
-import com.example.doicram.courses.db.repo.CoursesRepository
-import com.example.doicram.courses.db.repo.GradeCategoriesRepository
+import com.example.doicram.db.entities.Assignments
+import com.example.doicram.db.entities.Courses
+import com.example.doicram.db.entities.GradeCategories
+import com.example.doicram.db.entities.GradeScale
+import com.example.doicram.db.repo.AssignmentsRepository
+import com.example.doicram.db.repo.CoursesRepository
+import com.example.doicram.db.repo.GradeCategoriesRepository
+import com.example.doicram.db.repo.GradeScaleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +23,7 @@ class CoursesViewModel @Inject constructor(
     private val coursesRepository: CoursesRepository,
     private val categoriesRepository: GradeCategoriesRepository,
     private val assignmentsRepository: AssignmentsRepository,
+    private val scalesRepository: GradeScaleRepository,
     private val gradeCalculationService: GradeCalculationService
 ) : ViewModel() {
     private val _state: MutableStateFlow<CoursesState> = MutableStateFlow(CoursesState())
@@ -56,7 +59,7 @@ class CoursesViewModel @Inject constructor(
 
     fun onAction(action: CoursesAction) {
         when (action) {
-            is CoursesAction.AddCourse -> addCourseWithCategories(action.course, action.categories)
+            is CoursesAction.AddCourse -> addCourse(action.course, action.categories, action.scales)
             is CoursesAction.DeleteCourse -> deleteCourse(action.course)
             is CoursesAction.SelectCourse -> selectCourse(action.courseId)
             is CoursesAction.DeselectCourse -> _state.update { it.copy(selectedCourse = null) }
@@ -66,14 +69,21 @@ class CoursesViewModel @Inject constructor(
         }
     }
 
-    private fun addCourseWithCategories(course: Courses, categories: List<GradeCategories>) {
+    private fun addCourse(
+        course: Courses,
+        categories: List<GradeCategories>,
+        scales: List<GradeScale>
+    ) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             try {
                 val courseId = coursesRepository.addCourse(course)
 
                 val categoriesWithId = categories.map { it.copy(courseId = courseId.toInt()) }
-                categoriesWithId.forEach { categoriesRepository.addCategory(it) }
+                categoriesRepository.addCategories(categoriesWithId)
+
+                val scalesWithId = scales.map { it.copy(courseId = courseId.toInt()) }
+                scalesRepository.insertGradeScales(scalesWithId)
 
                 loadCourses()
             } catch (e: Exception) {

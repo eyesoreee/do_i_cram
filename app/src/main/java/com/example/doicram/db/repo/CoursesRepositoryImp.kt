@@ -1,13 +1,16 @@
-package com.example.doicram.courses.db.repo
+package com.example.doicram.db.repo
 
-import com.example.doicram.courses.db.dao.CoursesDao
-import com.example.doicram.courses.db.entities.CourseWithCategories
-import com.example.doicram.courses.db.entities.CourseWithFullDetails
-import com.example.doicram.courses.db.entities.Courses
+import com.example.doicram.db.dao.CoursesDao
+import com.example.doicram.db.dao.GradeScaleDao
+import com.example.doicram.db.entities.CourseWithCategories
+import com.example.doicram.db.entities.CourseWithFullDetails
+import com.example.doicram.db.entities.Courses
+import com.example.doicram.db.entities.GradeScale
 import javax.inject.Inject
 
 class CoursesRepositoryImpl @Inject constructor(
-    private val coursesDao: CoursesDao
+    private val coursesDao: CoursesDao,
+    private val gradeScaleDao: GradeScaleDao
 ) : CoursesRepository {
 
     override suspend fun addCourse(course: Courses): Long {
@@ -32,5 +35,12 @@ class CoursesRepositoryImpl @Inject constructor(
 
     override suspend fun updateCourse(course: Courses) {
         coursesDao.updateCourse(course)
+    }
+
+    override suspend fun getGradingScaleForCourse(courseId: Int): List<GradeScale> {
+        val customScales = gradeScaleDao.getByCourseId(courseId)
+        return customScales.ifEmpty {
+            gradeScaleDao.getDefaultScales()
+        }
     }
 }

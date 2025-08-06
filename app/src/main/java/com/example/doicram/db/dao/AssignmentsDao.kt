@@ -1,4 +1,4 @@
-package com.example.doicram.courses.db.dao
+package com.example.doicram.db.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -6,7 +6,12 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.doicram.courses.db.entities.Assignments
+import com.example.doicram.db.entities.Assignments
+
+data class AssignmentCounts(
+    val graded: Int,
+    val total: Int
+)
 
 @Dao
 interface AssignmentsDao {

@@ -162,7 +162,7 @@ fun SideMenu(
         ) { contentPadding ->
             NavHost(
                 navController = navController,
-                startDestination = "courses",
+                startDestination = "dashboard",
                 modifier = Modifier
                     .padding(contentPadding)
                     .padding(vertical = 16.dp, horizontal = 24.dp)

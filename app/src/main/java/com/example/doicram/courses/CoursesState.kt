@@ -1,7 +1,7 @@
 package com.example.doicram.courses
 
-import com.example.doicram.courses.db.entities.CourseWithCategories
-import com.example.doicram.courses.db.entities.CourseWithFullDetails
+import com.example.doicram.db.entities.CourseWithCategories
+import com.example.doicram.db.entities.CourseWithFullDetails
 
 data class CoursesState(
     val courses: List<CourseWithCategories> = emptyList(),

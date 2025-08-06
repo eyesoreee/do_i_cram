@@ -1,6 +1,6 @@
-package com.example.doicram.courses.db.repo
+package com.example.doicram.db.repo
 
-import com.example.doicram.courses.db.entities.Assignments
+import com.example.doicram.db.entities.Assignments
 
 interface AssignmentsRepository {
     suspend fun addAssignment(assignment: Assignments): Long

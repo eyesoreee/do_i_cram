@@ -1,4 +1,4 @@
-package com.example.doicram.courses.db.dao
+package com.example.doicram.db.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -7,9 +7,9 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import com.example.doicram.courses.db.entities.CourseWithCategories
-import com.example.doicram.courses.db.entities.CourseWithFullDetails
-import com.example.doicram.courses.db.entities.Courses
+import com.example.doicram.db.entities.CourseWithCategories
+import com.example.doicram.db.entities.CourseWithFullDetails
+import com.example.doicram.db.entities.Courses
 
 @Dao
 interface CoursesDao {
@@ -24,7 +24,6 @@ interface CoursesDao {
     @Query("SELECT * FROM courses WHERE id = :courseId")
     suspend fun getCourseById(courseId: Int): CourseWithCategories
 
-    // New method for getting full details
     @Transaction
     @Query("SELECT * FROM courses WHERE id = :courseId")
     suspend fun getCourseWithFullDetails(courseId: Int): CourseWithFullDetails

@@ -1,8 +1,9 @@
-package com.example.doicram.courses.db.repo
+package com.example.doicram.db.repo
 
-import com.example.doicram.courses.db.entities.CourseWithCategories
-import com.example.doicram.courses.db.entities.CourseWithFullDetails
-import com.example.doicram.courses.db.entities.Courses
+import com.example.doicram.db.entities.CourseWithCategories
+import com.example.doicram.db.entities.CourseWithFullDetails
+import com.example.doicram.db.entities.Courses
+import com.example.doicram.db.entities.GradeScale
 
 interface CoursesRepository {
     suspend fun addCourse(course: Courses): Long
@@ -11,4 +12,5 @@ interface CoursesRepository {
     suspend fun getCourseWithFullDetails(courseId: Int): CourseWithFullDetails
     suspend fun deleteCourse(course: Courses)
     suspend fun updateCourse(course: Courses)
+    suspend fun getGradingScaleForCourse(courseId: Int): List<GradeScale>
 }

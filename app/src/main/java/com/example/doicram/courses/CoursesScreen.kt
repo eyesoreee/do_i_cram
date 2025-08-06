@@ -16,8 +16,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Grade
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,8 +38,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.doicram.Loading
 import com.example.doicram.PageHeader
-import com.example.doicram.courses.db.entities.Assignments
-import com.example.doicram.courses.db.entities.Courses
+import com.example.doicram.db.entities.Assignments
+import com.example.doicram.db.entities.Courses
 
 data class CourseTab(
     val icon: ImageVector,
@@ -181,7 +182,7 @@ fun CoursesScreen(
                 item {
                     CourseTab(
                         selectedTabIndex = selectedDetailedTabIndex,
-                        tabs = listOf("Overview", "Assignments"),
+                        tabs = listOf("Overview", "Assignments", "Settings"),
                         onTabSelected = { index ->
                             selectedDetailedTabIndex = index
                         }
@@ -191,101 +192,143 @@ fun CoursesScreen(
                 }
 
 
-                if (selectedDetailedTabIndex == 0) {
-                    item {
-                        OverviewContent(state.selectedCourse!!)
+                when (selectedDetailedTabIndex) {
+                    // Overview Content
+                    0 -> {
+                        item {
+                            OverviewContent(state.selectedCourse!!)
+                        }
                     }
-                } else {
-                    item {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "Assignment Manager",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            TextButton(
-                                onClick = {
-                                    showAddAssignmentDialog = showAddAssignmentDialog.not()
-                                },
-                                modifier = Modifier.border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.inverseSurface,
-                                    MaterialTheme.shapes.extraLarge
-                                )
+
+                    // Assignments Content
+                    1 -> {
+                        item {
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.inverseSurface,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(2.dp))
                                 Text(
-                                    text = "Add Assignment",
-                                    color = MaterialTheme.colorScheme.inverseSurface
+                                    text = "Assignment Manager",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
                                 )
+                                TextButton(
+                                    onClick = {
+                                        showAddAssignmentDialog = showAddAssignmentDialog.not()
+                                    },
+                                    modifier = Modifier.border(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.inverseSurface,
+                                        MaterialTheme.shapes.extraLarge
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.inverseSurface,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(2.dp))
+                                    Text(
+                                        text = "Add Assignment",
+                                        color = MaterialTheme.colorScheme.inverseSurface
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(24.dp))
+                        }
+
+                        items(state.selectedCourse!!.categoriesWithAssignments) { categoryWithAssignments ->
+                            CategoryAssignmentCard(
+                                categoryWithAssignments = categoryWithAssignments,
+                                onDeleteClick = { assignment ->
+                                    assignmentToDelete = assignment
+                                    showDeleteAssignmentDialog = true
+                                },
+                                onEditClick = { assignment ->
+                                    assignmentToEdit = assignment
+                                    showEditAssignmentDialog = true
+                                }
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    }
+
+                    // Course Settings Content
+                    else -> {
+                        item {
+                            Text(
+                                text = "Course Settings",
+                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
+
+                        item {
+                            // Basic Information Card
+                            SettingsCard(
+                                title = "Basic Information",
+                                icon = Icons.Default.School
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    InfoRow(
+                                        label = "Course Name",
+                                        value = state.selectedCourse!!.course.name
+                                    )
+                                    InfoRow(
+                                        label = "Course Code",
+                                        value = state.selectedCourse!!.course.code
+                                    )
+                                    InfoRow(
+                                        label = "Course Units",
+                                        value = "${state.selectedCourse!!.course.units}"
+                                    )
+                                    InfoRow(
+                                        label = "Target Grade",
+                                        value = "${state.selectedCourse!!.course.targetGrade ?: "Not Set"}",
+                                        valueColor = if (state.selectedCourse!!.course.targetGrade != null)
+                                            MaterialTheme.colorScheme.primary else
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
+                                }
                             }
                         }
-                        Spacer(modifier = Modifier.height(24.dp))
-                    }
 
-                    items(state.selectedCourse!!.categoriesWithAssignments) { it ->
-                        Card(
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp)
+                        item {
+                            // Grading Scale Card
+                            SettingsCard(
+                                title = "Grading Scale",
+                                icon = Icons.Default.Grade
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Text(text = it.category.name)
-                                    Text(text = "${it.assignments.size} Assignments")
-                                }
-
-                                Spacer(modifier = Modifier.height(12.dp))
-
-                                if (it.assignments.isEmpty()) {
-                                    Text(
-                                        text = "No assignments added yet",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                } else {
-                                    it.assignments.forEach { assignment ->
-                                        AssignmentCard(
-                                            assignment = assignment,
-                                            categoryColor = it.category.color,
-                                            onDeleteClick = { assignment ->
-                                                assignmentToDelete = assignment
-                                                showDeleteAssignmentDialog = true
-                                            },
-                                            onEditClick = { assignment ->
-                                                assignmentToEdit = assignment
-                                                showEditAssignmentDialog = true
-                                            }
-                                        )
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    state.selectedCourse!!.gradeScales.forEach { scale ->
+                                        GradeScaleRow(scale)
                                     }
                                 }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        item {
+                            // Grade Categories Card
+                            SettingsCard(
+                                title = "Grade Categories",
+                                icon = Icons.Default.Category
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    state.selectedCourse!!.categoriesWithAssignments.forEach { (category, _) ->
+                                        SettingsCategoryRow(category)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
 
             else -> {
-
-
                 items(state.courses) { course ->
                     CourseCard(
                         course = course,
@@ -304,8 +347,8 @@ fun CoursesScreen(
     AddCourseDialog(
         showDialog = showAddCourseDialog,
         onDismissRequest = { showAddCourseDialog = false },
-        onAddCourse = { course, categories ->
-            viewModel.onAction(CoursesAction.AddCourse(course, categories))
+        onAddCourse = { course, categories, scales ->
+            viewModel.onAction(CoursesAction.AddCourse(course, categories, scales))
             showAddCourseDialog = false
         }
     )

@@ -1,4 +1,4 @@
-package com.example.doicram.courses.db.entities
+package com.example.doicram.db.entities
 
 import androidx.compose.ui.graphics.Color
 import androidx.room.ColumnInfo
@@ -65,4 +65,54 @@ data class GradeCategories(
             CategoryColor.PINK -> Color(0xFFC2185B)
             CategoryColor.INDIGO -> Color(0xFF303F9F)
         }
+
+    fun getGpaEquivalent(gradeScale: List<GradeScale>): Double? {
+        return currentGrade?.let { grade ->
+            GradeScale.calculateGpa(grade, gradeScale)
+        }
+    }
+
+    fun isPassing(gradeScale: List<GradeScale>): Boolean? {
+        return currentGrade?.let { grade ->
+            GradeScale.getGpaForPercentage(grade, gradeScale)?.isPassing
+        }
+    }
+
+    companion object {
+        fun getDefaultCategories(): List<GradeCategories> {
+            return listOf(
+                GradeCategories(
+                    courseId = 0,
+                    name = "Preliminary Exam",
+                    weight = 20.0,
+                    colorName = CategoryColor.BLUE
+                ),
+                GradeCategories(
+                    courseId = 0,
+                    name = "Midterm Exam",
+                    weight = 20.0,
+                    colorName = CategoryColor.GREEN
+                ),
+                GradeCategories(
+                    courseId = 0,
+                    name = "Final Exam",
+                    weight = 20.0,
+                    colorName = CategoryColor.RED
+                ),
+                GradeCategories(
+                    courseId = 0,
+                    name = "Project",
+                    weight = 25.0,
+                    colorName = CategoryColor.PURPLE
+                ),
+                GradeCategories(
+                    courseId = 0,
+                    name = "Activities and Quizzes",
+                    weight = 15.0,
+                    colorName = CategoryColor.ORANGE
+
+                )
+            )
+        }
+    }
 }

@@ -1,4 +1,4 @@
-package com.example.doicram.courses.db.dao
+package com.example.doicram.db.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -6,12 +6,15 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.doicram.courses.db.entities.GradeCategories
+import com.example.doicram.db.entities.GradeCategories
 
 @Dao
 interface GradeCategoriesDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addCategory(category: GradeCategories)
+    suspend fun addCategory(category: GradeCategories): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addCategories(categories: List<GradeCategories>): List<Long>
 
     @Update
     suspend fun updateCategory(category: GradeCategories)

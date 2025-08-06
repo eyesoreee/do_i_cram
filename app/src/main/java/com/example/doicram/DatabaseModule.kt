@@ -2,9 +2,10 @@ package com.example.doicram
 
 import android.content.Context
 import androidx.room.Room
-import com.example.doicram.courses.db.dao.AssignmentsDao
-import com.example.doicram.courses.db.dao.CoursesDao
-import com.example.doicram.courses.db.dao.GradeCategoriesDao
+import com.example.doicram.db.dao.AssignmentsDao
+import com.example.doicram.db.dao.CoursesDao
+import com.example.doicram.db.dao.GradeCategoriesDao
+import com.example.doicram.db.dao.GradeScaleDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,5 +43,12 @@ object DatabaseModule {
     @Singleton
     fun provideAssignmentsDao(database: AppDatabase): AssignmentsDao {
         return database.assignmentsDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideGradeScaleDao(database: AppDatabase): GradeScaleDao {
+        return database.gradeScaleDao()
+
     }
 }

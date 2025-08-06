@@ -1,4 +1,4 @@
-package com.example.doicram.courses.db.entities
+package com.example.doicram.db.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -48,4 +48,20 @@ data class Assignments(
 
     @ColumnInfo(name = "archived_at")
     val archivedAt: Long? = null
-)
+) {
+    val percentageScore: Double?
+        get() = score?.let { (it.toDouble() / maxScore.toDouble()) * 100 }
+
+    fun getGpaEquivalent(gradeScale: List<GradeScale>): Double? {
+        return percentageScore?.let { percentage ->
+            GradeScale.calculateGpa(percentage, gradeScale)
+        }
+    }
+
+    fun isPassing(gradeScale: List<GradeScale>): Boolean? {
+        return percentageScore?.let { percentage ->
+            GradeScale.getGpaForPercentage(percentage, gradeScale)?.isPassing
+        }
+    }
+
+}

@@ -28,9 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.doicram.courses.db.entities.CourseWithCategories
-import com.example.doicram.courses.db.entities.Courses
-import com.example.doicram.courses.db.entities.GradeCategories
+import com.example.doicram.db.entities.CourseWithCategories
+import com.example.doicram.db.entities.Courses
+import com.example.doicram.db.entities.GradeCategories
 
 @Composable
 fun CourseCard(
@@ -50,8 +50,8 @@ fun CourseCard(
             CourseCardHeader(course, onEdit, onDelete)
             Details(course)
             Spacer(modifier = Modifier.height(20.dp))
-            course.course.passingGrade?.let {
-                PassingGradeSection(it)
+            course.course.targetGrade?.let {
+                TargetGradeSection(it)
                 Spacer(modifier = Modifier.height(20.dp))
             }
             GradeCategoriesSection(course)
@@ -111,19 +111,19 @@ private fun Details(course: CourseWithCategories) {
 }
 
 @Composable
-private fun PassingGradeSection(passingGrade: Double) {
+private fun TargetGradeSection(targetGrade: Double) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            "Passing Grade:",
+            "Target Grade:",
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
-            text = "${passingGrade.toInt()}%",
+            text = "${targetGrade.toInt()}%",
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -145,14 +145,14 @@ private fun GradeCategoriesSection(course: CourseWithCategories) {
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        AssignmentSummary(total = 5, completed = 4)
+        AssignmentSummary(total = course.totalAssignments, completed = course.gradedAssignments)
     } else {
         EmptyCategoriesMessage()
     }
 }
 
 @Composable
-private fun CategoryRow(category: GradeCategories) {
+fun CategoryRow(category: GradeCategories) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,

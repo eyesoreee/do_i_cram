@@ -36,8 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.doicram.courses.db.entities.Assignments
-import com.example.doicram.courses.db.entities.CategoryWithAssignments
+import com.example.doicram.db.entities.Assignments
+import com.example.doicram.db.entities.CategoryWithAssignments
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
