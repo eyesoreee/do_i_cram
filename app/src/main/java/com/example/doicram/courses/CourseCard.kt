@@ -28,13 +28,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.doicram.db.entities.CourseWithCategories
+import com.example.doicram.db.entities.CourseWithCategoryAndScale
 import com.example.doicram.db.entities.Courses
 import com.example.doicram.db.entities.GradeCategories
 
 @Composable
 fun CourseCard(
-    course: CourseWithCategories,
+    course: CourseWithCategoryAndScale,
     onEdit: () -> Unit,
     onDelete: (Courses) -> Unit
 ) {
@@ -47,21 +47,25 @@ fun CourseCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            CourseCardHeader(course, onEdit, onDelete)
-            Details(course)
+            CourseCardHeader(course.course, onEdit, onDelete)
+            Details(course.course)
             Spacer(modifier = Modifier.height(20.dp))
             course.course.targetGrade?.let {
                 TargetGradeSection(it)
                 Spacer(modifier = Modifier.height(20.dp))
             }
-            GradeCategoriesSection(course)
+            GradeCategoriesSection(
+                categories = course.categories,
+                total = course.totalAssignments,
+                completed = course.completedAssignments
+            )
         }
     }
 }
 
 @Composable
 private fun CourseCardHeader(
-    course: CourseWithCategories,
+    course: Courses,
     onEdit: () -> Unit,
     onDelete: (Courses) -> Unit
 ) {
@@ -71,7 +75,7 @@ private fun CourseCardHeader(
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = course.course.name,
+            text = course.name,
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
@@ -88,7 +92,7 @@ private fun CourseCardHeader(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            IconButton(onClick = { onDelete(course.course) }, modifier = Modifier.size(32.dp)) {
+            IconButton(onClick = { onDelete(course) }, modifier = Modifier.size(32.dp)) {
                 Icon(
                     imageVector = Icons.Outlined.Delete,
                     contentDescription = "Delete course",
@@ -101,9 +105,9 @@ private fun CourseCardHeader(
 }
 
 @Composable
-private fun Details(course: CourseWithCategories) {
+private fun Details(course: Courses) {
     Text(
-        text = "${course.course.code}  •  ${course.course.units} units",
+        text = "${course.code}  •  ${course.units} units",
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = 4.dp)
@@ -131,8 +135,12 @@ private fun TargetGradeSection(targetGrade: Double) {
 }
 
 @Composable
-private fun GradeCategoriesSection(course: CourseWithCategories) {
-    if (course.categories.isNotEmpty()) {
+private fun GradeCategoriesSection(
+    categories: List<GradeCategories>,
+    total: Int = 0,
+    completed: Int = 0,
+) {
+    if (categories.isNotEmpty()) {
         Text(
             text = "Grade Categories",
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
@@ -140,12 +148,12 @@ private fun GradeCategoriesSection(course: CourseWithCategories) {
             modifier = Modifier.padding(bottom = 12.dp)
         )
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            course.categories.forEach { category ->
+            categories.forEach { category ->
                 CategoryRow(category)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        AssignmentSummary(total = course.totalAssignments, completed = course.gradedAssignments)
+        AssignmentSummary(total = total, completed = completed)
     } else {
         EmptyCategoriesMessage()
     }

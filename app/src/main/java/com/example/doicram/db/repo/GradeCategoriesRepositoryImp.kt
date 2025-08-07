@@ -30,4 +30,8 @@ class GradeCategoriesRepositoryImpl @Inject constructor(
     override suspend fun deleteCategory(category: GradeCategories) {
         gradeCategoriesDao.deleteCategory(category)
     }
+
+    override suspend fun deleteCategories(categories: List<GradeCategories>) {
+        gradeCategoriesDao.deleteCategories(categories)
+    }
 }

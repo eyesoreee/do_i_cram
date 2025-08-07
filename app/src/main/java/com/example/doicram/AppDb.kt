@@ -13,7 +13,7 @@ import com.example.doicram.db.entities.GradeScale
 
 @Database(
     entities = [Courses::class, GradeCategories::class, Assignments::class, GradeScale::class],
-    version = 8
+    version = 7
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun coursesDao(): CoursesDao

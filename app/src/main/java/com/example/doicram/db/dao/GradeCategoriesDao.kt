@@ -26,5 +26,8 @@ interface GradeCategoriesDao {
     suspend fun getCategoryById(categoryId: Int): GradeCategories?
 
     @Delete
-    suspend fun deleteCategory(category: GradeCategories)
+    suspend fun deleteCategory(category: GradeCategories): Int
+
+    @Delete
+    suspend fun deleteCategories(categories: List<GradeCategories>)
 }

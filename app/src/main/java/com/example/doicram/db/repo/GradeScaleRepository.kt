@@ -7,6 +7,7 @@ interface GradeScaleRepository {
     suspend fun insertGradeScales(gradeScales: List<GradeScale>): List<Long>
     suspend fun updateGradeScale(gradeScale: GradeScale): Int
     suspend fun deleteGradeScale(gradeScale: GradeScale): Int
+    suspend fun deleteGradeScales(gradeScales: List<GradeScale>)
     suspend fun getAllGradeScales(): List<GradeScale>
     suspend fun getGradeScalesForCourse(courseId: Int): List<GradeScale>
     suspend fun getDefaultGradeScales(): List<GradeScale>

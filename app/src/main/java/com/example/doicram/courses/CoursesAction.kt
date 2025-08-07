@@ -12,6 +12,12 @@ sealed interface CoursesAction {
         val scales: List<GradeScale>
     ) : CoursesAction
 
+    data class UpdateCourse(
+        val course: Courses,
+        val categories: List<GradeCategories>,
+        val scales: List<GradeScale>
+    ) : CoursesAction
+
     data class DeleteCourse(val course: Courses) : CoursesAction
     data class SelectCourse(val courseId: Int) : CoursesAction
     data object DeselectCourse : CoursesAction

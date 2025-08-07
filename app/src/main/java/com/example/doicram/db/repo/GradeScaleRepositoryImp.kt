@@ -50,5 +50,9 @@ class GradeScaleRepositoryImpl @Inject constructor(
     override suspend fun updateGradeScale(gradeScale: GradeScale): Int {
         return gradeScaleDao.updateGradeScale(gradeScale)
     }
+
+    override suspend fun deleteGradeScales(gradeScales: List<GradeScale>) {
+        gradeScaleDao.deleteGradeScales(gradeScales)
+    }
 }
 

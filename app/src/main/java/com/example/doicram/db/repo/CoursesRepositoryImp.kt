@@ -3,6 +3,7 @@ package com.example.doicram.db.repo
 import com.example.doicram.db.dao.CoursesDao
 import com.example.doicram.db.dao.GradeScaleDao
 import com.example.doicram.db.entities.CourseWithCategories
+import com.example.doicram.db.entities.CourseWithCategoryAndScale
 import com.example.doicram.db.entities.CourseWithFullDetails
 import com.example.doicram.db.entities.Courses
 import com.example.doicram.db.entities.GradeScale
@@ -17,8 +18,21 @@ class CoursesRepositoryImpl @Inject constructor(
         return coursesDao.addCourse(course)
     }
 
-    override suspend fun getCourses(): List<CourseWithCategories> {
-        return coursesDao.getCourses()
+    override suspend fun getCourses(): List<CourseWithCategoryAndScale> {
+        val coursesWithCounts = coursesDao.getCourseWithAssignmentCounts()
+
+        return coursesWithCounts.map { course ->
+            val categories = coursesDao.getCategoriesForCourse(course.courses.id)
+            val scales = coursesDao.getGradeScalesForCourse(course.courses.id)
+
+            CourseWithCategoryAndScale(
+                course = course.courses,
+                categories = categories,
+                scales = scales,
+                totalAssignments = course.totalAssignments,
+                completedAssignments = course.completedAssignments
+            )
+        }
     }
 
     override suspend fun getCourseById(courseId: Int): CourseWithCategories {

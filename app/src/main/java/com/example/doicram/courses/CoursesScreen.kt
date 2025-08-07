@@ -39,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.doicram.Loading
 import com.example.doicram.PageHeader
 import com.example.doicram.db.entities.Assignments
+import com.example.doicram.db.entities.CourseWithCategoryAndScale
 import com.example.doicram.db.entities.Courses
 
 data class CourseTab(
@@ -73,6 +74,9 @@ fun CoursesScreen(
 
     var showEditAssignmentDialog by remember { mutableStateOf(false) }
     var assignmentToEdit by remember { mutableStateOf<Assignments?>(null) }
+
+    var showEditCourseDialog by remember { mutableStateOf(false) }
+    var courseToEdit by remember { mutableStateOf<CourseWithCategoryAndScale?>(null) }
 
     var showDeleteCourseDialog by remember { mutableStateOf(false) }
     var courseToDelete by remember { mutableStateOf<Courses?>(null) }
@@ -332,7 +336,10 @@ fun CoursesScreen(
                 items(state.courses) { course ->
                     CourseCard(
                         course = course,
-                        onEdit = { },
+                        onEdit = {
+                            courseToEdit = course
+                            showEditCourseDialog = true
+                        },
                         onDelete = { course ->
                             courseToDelete = course
                             showDeleteCourseDialog = true
@@ -350,6 +357,33 @@ fun CoursesScreen(
         onAddCourse = { course, categories, scales ->
             viewModel.onAction(CoursesAction.AddCourse(course, categories, scales))
             showAddCourseDialog = false
+        }
+    )
+
+    EditCourseDialog(
+        showDialog = showEditCourseDialog,
+        course = courseToEdit,
+        onDismissRequest = { showEditCourseDialog = false },
+        onEditCourse = { course, categories, scales ->
+            viewModel.onAction(CoursesAction.UpdateCourse(course, categories, scales))
+            showEditCourseDialog = false
+            courseToEdit = null
+        }
+    )
+
+
+    DeleteCourseDialog(
+        showDialog = showDeleteCourseDialog,
+        onDismissRequest = {
+            showDeleteCourseDialog = showDeleteCourseDialog.not()
+            courseToEdit = null
+        },
+        onDelete = {
+            courseToDelete.let {
+                viewModel.onAction(CoursesAction.DeleteCourse(courseToDelete!!))
+            }
+            showDeleteCourseDialog = false
+            courseToDelete = null
         }
     )
 
@@ -375,18 +409,6 @@ fun CoursesScreen(
             viewModel.onAction(CoursesAction.UpdateAssignment(updatedAssignment))
             showEditAssignmentDialog = false
             assignmentToEdit = null
-        }
-    )
-
-    DeleteCourseDialog(
-        showDialog = showDeleteCourseDialog,
-        onDismissRequest = { showDeleteCourseDialog = showDeleteCourseDialog.not() },
-        onDelete = {
-            courseToDelete.let {
-                viewModel.onAction(CoursesAction.DeleteCourse(courseToDelete!!))
-            }
-            showDeleteCourseDialog = false
-            courseToDelete = null
         }
     )
 

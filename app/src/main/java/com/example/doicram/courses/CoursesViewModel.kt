@@ -57,12 +57,20 @@ class CoursesViewModel @Inject constructor(
         }
     }
 
+
     fun onAction(action: CoursesAction) {
         when (action) {
             is CoursesAction.AddCourse -> addCourse(action.course, action.categories, action.scales)
             is CoursesAction.DeleteCourse -> deleteCourse(action.course)
+            is CoursesAction.UpdateCourse -> updateCourse(
+                action.course,
+                action.categories,
+                action.scales
+            )
+
             is CoursesAction.SelectCourse -> selectCourse(action.courseId)
             is CoursesAction.DeselectCourse -> _state.update { it.copy(selectedCourse = null) }
+
             is CoursesAction.AddAssignment -> addAssignment(action.assignment)
             is CoursesAction.DeleteAssignment -> deleteAssignment(action.assignment)
             is CoursesAction.UpdateAssignment -> updateAssignment(action.updatedAssignment)
@@ -195,12 +203,61 @@ class CoursesViewModel @Inject constructor(
                     gradeCalculationService.recalculateGradesForCategory(assignment.categoryId)
                 }
 
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = null
+                    )
+                }
+
                 refreshAssignment()
             } catch (e: Exception) {
                 _state.update {
                     it.copy(
                         isLoading = false,
                         error = "Failed to delete assignment: ${e.localizedMessage ?: "Unknown error"}"
+                    )
+                }
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun updateCourse(
+        course: Courses,
+        categories: List<GradeCategories>,
+        scales: List<GradeScale>
+    ) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            try {
+                coursesRepository.updateCourse(course)
+                
+                val categoriesToDelete = categoriesRepository.getCategoriesForCourse(course.id)
+                val scalesToDelete = scalesRepository.getGradeScalesForCourse(course.id)
+
+                categoriesRepository.deleteCategories(categoriesToDelete)
+                scalesRepository.deleteGradeScales(scalesToDelete)
+
+                val categoriesWithId = categories.map { it.copy(courseId = course.id) }
+                categoriesRepository.addCategories(categoriesWithId)
+
+                val scalesWithId = scales.map { it.copy(courseId = course.id) }
+                scalesRepository.insertGradeScales(scalesWithId)
+
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = null
+                    )
+                }
+
+                loadCourses()
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Failed to add course or categories: ${e.localizedMessage ?: "Unknown error"}"
                     )
                 }
                 e.printStackTrace()

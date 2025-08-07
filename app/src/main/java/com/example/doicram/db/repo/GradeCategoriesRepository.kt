@@ -9,4 +9,5 @@ interface GradeCategoriesRepository {
     suspend fun getCategoriesForCourse(courseId: Int): List<GradeCategories>
     suspend fun getCategoryById(categoryId: Int): GradeCategories?
     suspend fun deleteCategory(category: GradeCategories)
+    suspend fun deleteCategories(categories: List<GradeCategories>)
 }

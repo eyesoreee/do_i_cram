@@ -22,6 +22,9 @@ interface GradeScaleDao {
     @Delete
     suspend fun deleteGradeScale(gradeScale: GradeScale): Int
 
+    @Delete
+    suspend fun deleteGradeScales(gradeScales: List<GradeScale>)
+
     @Query("SELECT * FROM grade_scales ORDER BY min_percentage DESC")
     suspend fun getAllGradeScales(): List<GradeScale>
 
