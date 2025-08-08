@@ -1,5 +1,7 @@
 package com.example.doicram.db.repo
 
+import com.example.doicram.dashboard.ActiveCoursesInfo
+import com.example.doicram.dashboard.NeedAttentionInfo
 import com.example.doicram.db.dao.CoursesDao
 import com.example.doicram.db.dao.GradeScaleDao
 import com.example.doicram.db.entities.CourseWithCategories
@@ -7,6 +9,8 @@ import com.example.doicram.db.entities.CourseWithCategoryAndScale
 import com.example.doicram.db.entities.CourseWithFullDetails
 import com.example.doicram.db.entities.Courses
 import com.example.doicram.db.entities.GradeScale
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class CoursesRepositoryImpl @Inject constructor(
@@ -57,4 +61,41 @@ class CoursesRepositoryImpl @Inject constructor(
             gradeScaleDao.getDefaultScales()
         }
     }
+
+    override suspend fun getActiveCourses(): List<Courses> {
+        return coursesDao.getActiveCourses()
+    }
+
+    override fun getCGPA(): Flow<Double?> {
+        return coursesDao.getActiveCoursesWithScaleFlow()
+            .map { activeCourses ->
+                val totalUnits = activeCourses.sumOf { it.course.units }
+
+                val totalGradePoints = activeCourses.sumOf { cw ->
+                    val gpa = cw.course.grade
+                        ?.let { GradeScale.calculateGpa(it, cw.gradeScales) }
+                        ?: 0.0
+                    gpa * cw.course.units
+                }
+
+                if (totalUnits > 0) totalGradePoints / totalUnits else null
+            }
+    }
+
+    override suspend fun getActiveCoursesInfo(): ActiveCoursesInfo {
+        return coursesDao.getActiveCoursesInfo()
+    }
+
+    override fun getActiveCoursesInfoFlow(): Flow<ActiveCoursesInfo> {
+        return coursesDao.getActiveCoursesInfoFlow()
+    }
+
+    override suspend fun getNeedAttentionInfo(): NeedAttentionInfo {
+        return coursesDao.getNeedAttentionInfo()
+    }
+
+    override fun getNeedAttentionInfoFlow(): Flow<NeedAttentionInfo> {
+        return coursesDao.getNeedAttentionInfoFlow()
+    }
+
 }

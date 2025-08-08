@@ -1,4 +1,4 @@
-package com.example.doicram.courses
+package com.example.doicram.courses.specific_course
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

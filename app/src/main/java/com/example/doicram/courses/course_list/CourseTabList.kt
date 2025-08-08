@@ -1,4 +1,4 @@
-package com.example.doicram.courses
+package com.example.doicram.courses.course_list
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +9,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.doicram.courses.CourseTab
 
 @Composable
 fun CourseTabList(

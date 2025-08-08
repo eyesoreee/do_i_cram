@@ -232,7 +232,7 @@ class CoursesViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, error = null) }
             try {
                 coursesRepository.updateCourse(course)
-                
+
                 val categoriesToDelete = categoriesRepository.getCategoriesForCourse(course.id)
                 val scalesToDelete = scalesRepository.getGradeScalesForCourse(course.id)
 

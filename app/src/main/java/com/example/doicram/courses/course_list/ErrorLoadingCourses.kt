@@ -1,4 +1,4 @@
-package com.example.doicram.courses
+package com.example.doicram.courses.course_list
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.doicram.courses.CoursesState
 
 @Composable
 fun ErrorLoadingCourses(

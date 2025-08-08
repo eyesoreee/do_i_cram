@@ -6,12 +6,9 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.example.doicram.dashboard.PendingAssignmentsInfo
 import com.example.doicram.db.entities.Assignments
-
-data class AssignmentCounts(
-    val graded: Int,
-    val total: Int
-)
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AssignmentsDao {
@@ -32,4 +29,32 @@ interface AssignmentsDao {
 
     @Query("DELETE FROM assignments WHERE category_id = :categoryId")
     suspend fun deleteAssignmentsForCategory(categoryId: Int)
+
+    @Query(
+        """
+        SELECT 
+            COALESCE(COUNT(CASE WHEN a.score IS NULL THEN 1 END), 0) as totalCount,
+            COUNT(CASE WHEN a.score IS NOT NULL THEN 1 END) as completed
+        FROM assignments a
+        INNER JOIN grade_categories gc ON a.category_id = gc.id
+        INNER JOIN courses c ON gc.course_id = c.id
+        WHERE a.archived_at IS NULL 
+        AND c.archived_at IS NULL
+    """
+    )
+    suspend fun getPendingAssignmentsInfo(): PendingAssignmentsInfo
+
+    @Query(
+        """
+        SELECT 
+            COALESCE(COUNT(CASE WHEN a.score IS NULL THEN 1 END), 0) as totalCount,
+            COUNT(CASE WHEN a.score IS NOT NULL THEN 1 END) as completed
+        FROM assignments a
+        INNER JOIN grade_categories gc ON a.category_id = gc.id
+        INNER JOIN courses c ON gc.course_id = c.id
+        WHERE a.archived_at IS NULL 
+        AND c.archived_at IS NULL
+    """
+    )
+    fun getPendingAssignmentsInfoFlow(): Flow<PendingAssignmentsInfo>
 }

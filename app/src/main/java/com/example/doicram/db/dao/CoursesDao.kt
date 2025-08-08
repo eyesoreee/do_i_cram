@@ -7,21 +7,16 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.example.doicram.dashboard.ActiveCoursesInfo
+import com.example.doicram.dashboard.NeedAttentionInfo
 import com.example.doicram.db.entities.CourseWithAssignmentCounts
 import com.example.doicram.db.entities.CourseWithCategories
 import com.example.doicram.db.entities.CourseWithFullDetails
+import com.example.doicram.db.entities.CourseWithGradeScale
 import com.example.doicram.db.entities.Courses
 import com.example.doicram.db.entities.GradeCategories
 import com.example.doicram.db.entities.GradeScale
-
-data class CourseUpdate(
-    val id: Int,
-    val name: String? = null,
-    val description: String? = null,
-    val targetGrade: Double? = null,
-    val grade: Double? = null,
-    val updatedAt: Long = System.currentTimeMillis()
-)
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CoursesDao {
@@ -93,4 +88,63 @@ interface CoursesDao {
 
     @Query("SELECT * FROM grade_scales WHERE course_id = :courseId")
     suspend fun getGradeScalesForCourse(courseId: Int): List<GradeScale>
+
+    @Query("SELECT * FROM courses WHERE archived_at IS NULL")
+    suspend fun getActiveCourses(): List<Courses>
+
+    @Transaction
+    @Query("SELECT * FROM courses WHERE archived_at IS NULL")
+    suspend fun getActiveCoursesWithScale(): List<CourseWithGradeScale>
+
+    @Transaction
+    @Query("SELECT * FROM courses WHERE archived_at IS NULL")
+    fun getActiveCoursesWithScaleFlow(): Flow<List<CourseWithGradeScale>>
+
+    // For Dashboard
+    @Query(
+        """
+        SELECT 
+            COUNT(*) as count,
+            COALESCE(SUM(units), 0) as totalUnits
+        FROM courses 
+        WHERE archived_at IS NULL
+    """
+    )
+    suspend fun getActiveCoursesInfo(): ActiveCoursesInfo
+
+    @Query(
+        """
+        SELECT 
+            COUNT(*) as count,
+            COALESCE(SUM(units), 0) as totalUnits
+        FROM courses 
+        WHERE archived_at IS NULL
+    """
+    )
+    fun getActiveCoursesInfoFlow(): Flow<ActiveCoursesInfo>
+
+
+    @Query(
+        """
+        SELECT COUNT(*) as count
+        FROM courses 
+        WHERE archived_at IS NULL
+        AND target_grade IS NOT NULL 
+        AND grade IS NOT NULL
+        AND grade < target_grade
+    """
+    )
+    suspend fun getNeedAttentionInfo(): NeedAttentionInfo
+
+    @Query(
+        """
+        SELECT COUNT(*) as count
+        FROM courses 
+        WHERE archived_at IS NULL
+        AND target_grade IS NOT NULL 
+        AND grade IS NOT NULL
+        AND grade < target_grade
+    """
+    )
+    fun getNeedAttentionInfoFlow(): Flow<NeedAttentionInfo>
 }

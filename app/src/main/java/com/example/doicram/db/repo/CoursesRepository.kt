@@ -1,10 +1,13 @@
 package com.example.doicram.db.repo
 
+import com.example.doicram.dashboard.ActiveCoursesInfo
+import com.example.doicram.dashboard.NeedAttentionInfo
 import com.example.doicram.db.entities.CourseWithCategories
 import com.example.doicram.db.entities.CourseWithCategoryAndScale
 import com.example.doicram.db.entities.CourseWithFullDetails
 import com.example.doicram.db.entities.Courses
 import com.example.doicram.db.entities.GradeScale
+import kotlinx.coroutines.flow.Flow
 
 interface CoursesRepository {
     suspend fun addCourse(course: Courses): Long
@@ -14,4 +17,10 @@ interface CoursesRepository {
     suspend fun deleteCourse(course: Courses)
     suspend fun updateCourse(course: Courses)
     suspend fun getGradingScaleForCourse(courseId: Int): List<GradeScale>
+    suspend fun getActiveCourses(): List<Courses>
+    fun getCGPA(): Flow<Double?>
+    suspend fun getActiveCoursesInfo(): ActiveCoursesInfo
+    fun getActiveCoursesInfoFlow(): Flow<ActiveCoursesInfo>
+    suspend fun getNeedAttentionInfo(): NeedAttentionInfo
+    fun getNeedAttentionInfoFlow(): Flow<NeedAttentionInfo>
 }

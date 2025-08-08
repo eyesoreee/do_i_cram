@@ -1,7 +1,9 @@
 package com.example.doicram.db.repo
 
+import com.example.doicram.dashboard.PendingAssignmentsInfo
 import com.example.doicram.db.dao.AssignmentsDao
 import com.example.doicram.db.entities.Assignments
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class AssignmentsRepositoryImpl @Inject constructor(
@@ -30,5 +32,13 @@ class AssignmentsRepositoryImpl @Inject constructor(
 
     override suspend fun deleteAssignmentsForCategory(categoryId: Int) {
         assignmentsDao.deleteAssignmentsForCategory(categoryId)
+    }
+
+    override suspend fun getPendingAssignmentsInfo(): PendingAssignmentsInfo {
+        return assignmentsDao.getPendingAssignmentsInfo()
+    }
+
+    override fun getPendingAssignmentsInfoFlow(): Flow<PendingAssignmentsInfo> {
+        return assignmentsDao.getPendingAssignmentsInfoFlow()
     }
 }

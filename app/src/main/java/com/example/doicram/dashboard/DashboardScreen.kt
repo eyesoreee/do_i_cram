@@ -15,13 +15,21 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.doicram.PageHeader
 
 @Composable
-fun DashboardScreen(modifier: Modifier = Modifier) {
+fun DashboardScreen(
+    modifier: Modifier = Modifier,
+    viewModel: DashboardViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
     Column(modifier = modifier.fillMaxSize()) {
         PageHeader(
             title = "Dashboard",
@@ -32,14 +40,13 @@ fun DashboardScreen(modifier: Modifier = Modifier) {
 
         // Current GPA Card
         OverviewCard(
-            title = "Current GPA",
+            title = "Current CGPA",
             icon = Icons.AutoMirrored.Filled.TrendingUp,
             iconColor = MaterialTheme.colorScheme.primary,
-            mainValue = "2.96",
+            mainValue = "${state.cgpa ?: "???"}",
             mainValueColor = MaterialTheme.colorScheme.primary,
-            secondaryValue = "/4.00",
+            secondaryValue = "/1.00",
             bottomIcon = Icons.Default.ArrowUpward,
-            bottomText = "+0.12 from last semester",
             modifier = Modifier.weight(1f)
         )
 
@@ -49,12 +56,12 @@ fun DashboardScreen(modifier: Modifier = Modifier) {
         OverviewCard(
             title = "Active Courses",
             icon = Icons.AutoMirrored.Filled.MenuBook,
-            iconColor = Color(0xFF4CAF50), // Keep green as it works well in both themes
-            mainValue = "2",
+            iconColor = Color(0xFF4CAF50),
+            mainValue = "${state.activeCourses?.count ?: 0}",
             mainValueColor = Color(0xFF4CAF50),
             secondaryValue = "courses",
             bottomIcon = Icons.Default.Star,
-            bottomText = "7 total credits",
+            bottomText = "${state.activeCourses?.totalUnits ?: 0} total units",
             modifier = Modifier.weight(1f)
         )
 
@@ -62,14 +69,14 @@ fun DashboardScreen(modifier: Modifier = Modifier) {
 
         // Upcoming Due Card
         OverviewCard(
-            title = "Upcoming Due",
+            title = "Pending Assignments",
             icon = Icons.Default.Schedule,
-            iconColor = Color(0xFFFF9800), // Keep orange as it works well in both themes
-            mainValue = "0",
+            iconColor = Color(0xFFFF9800),
+            mainValue = "${state.pendingAssignments?.totalCount ?: 0}",
             mainValueColor = Color(0xFFFF9800),
             secondaryValue = "assignments",
             bottomIcon = Icons.Default.Alarm,
-            bottomText = "Next due in 2 days",
+            bottomText = "${state.pendingAssignments?.completed} completed",
             modifier = Modifier.weight(1f)
         )
 
@@ -80,11 +87,11 @@ fun DashboardScreen(modifier: Modifier = Modifier) {
             title = "Need Attention",
             icon = Icons.Default.Warning,
             iconColor = MaterialTheme.colorScheme.error,
-            mainValue = "2",
+            mainValue = "${state.needAttention?.count ?: 0}",
             mainValueColor = MaterialTheme.colorScheme.error,
             secondaryValue = "courses",
             bottomIcon = Icons.Default.ArrowDownward,
-            bottomText = "Below target grade",
+            bottomText = state.needAttention?.subtext,
             modifier = Modifier.weight(1f)
         )
     }

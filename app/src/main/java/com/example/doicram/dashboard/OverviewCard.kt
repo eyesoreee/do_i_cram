@@ -31,9 +31,9 @@ fun OverviewCard(
     mainValue: String,
     mainValueColor: Color,
     secondaryValue: String,
-    bottomIcon: ImageVector,
+    bottomIcon: ImageVector? = null,
     bottomIconColor: Color = Color.Unspecified,
-    bottomText: String,
+    bottomText: String? = null,
     modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -83,27 +83,29 @@ fun OverviewCard(
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            if (bottomIcon != null && bottomText != null) {
+                Spacer(modifier = Modifier.weight(1f))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Icon(
-                    imageVector = bottomIcon,
-                    contentDescription = null,
-                    tint = if (bottomIconColor == Color.Unspecified) colorScheme.onSurfaceVariant.copy(
-                        alpha = 0.9f
-                    ) else bottomIconColor,
-                    modifier = Modifier.size(12.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = bottomIcon,
+                        contentDescription = null,
+                        tint = if (bottomIconColor == Color.Unspecified) colorScheme.onSurfaceVariant.copy(
+                            alpha = 0.9f
+                        ) else bottomIconColor,
+                        modifier = Modifier.size(12.dp)
+                    )
 
-                Text(
-                    text = bottomText,
-                    style = typography.bodySmall,
-                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.9f),
-                )
+                    Text(
+                        text = bottomText,
+                        style = typography.bodySmall,
+                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.9f),
+                    )
+                }
             }
         }
     }

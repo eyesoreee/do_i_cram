@@ -1,4 +1,4 @@
-package com.example.doicram.courses
+package com.example.doicram.courses.course_list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
