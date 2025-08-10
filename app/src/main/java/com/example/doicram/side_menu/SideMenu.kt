@@ -37,8 +37,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.doicram.courses.CoursesScreen
 import com.example.doicram.dashboard.DashboardScreen
-import com.example.doicram.gpa_calculator.GpaCalculatorScreen
 import com.example.doicram.grade_analytics.GradeAnalyticsScreen
+import com.example.doicram.grade_calculator.GradeCalculatorScreen
 import com.example.doicram.settings.SettingsScreen
 import com.example.doicram.what_ifs.WhatIfScreen
 import kotlinx.coroutines.launch
@@ -68,16 +68,16 @@ fun SideMenu(
                 route = "courses"
             ),
             NavigationItem(
+                icon = Icons.Outlined.Grade,
+                title = "Grade Calculator",
+                subtitle = "Calculate your grade",
+                route = "gradeCalculator"
+            ),
+            NavigationItem(
                 icon = Icons.Outlined.Calculate,
                 title = "What-If Calculator",
                 subtitle = "Calculate required scores",
                 route = "whatIf"
-            ),
-            NavigationItem(
-                icon = Icons.Outlined.Grade,
-                title = "GPA Calculator",
-                subtitle = "Calculate overall GPA",
-                route = "gpaCalculator"
             ),
             NavigationItem(
                 icon = Icons.Outlined.BarChart,
@@ -170,7 +170,7 @@ fun SideMenu(
                 composable(route = "dashboard") { DashboardScreen() }
                 composable(route = "courses") { CoursesScreen() }
                 composable(route = "whatIf") { WhatIfScreen() }
-                composable(route = "gpaCalculator") { GpaCalculatorScreen() }
+                composable(route = "gradeCalculator") { GradeCalculatorScreen() }
                 composable(route = "analytics") { GradeAnalyticsScreen() }
                 composable(route = "settings") { SettingsScreen() }
             }

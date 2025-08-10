@@ -48,7 +48,7 @@ fun CategoryAssignmentCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
@@ -110,7 +110,7 @@ fun CategoryAssignmentCard(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -176,7 +176,7 @@ fun AssignmentCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.5f),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
         shadowElevation = 1.dp
     ) {
         Column(

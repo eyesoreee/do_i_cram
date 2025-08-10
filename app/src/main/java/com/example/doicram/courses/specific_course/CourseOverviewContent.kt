@@ -107,7 +107,7 @@ private fun OverallGradeCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(16.dp)
@@ -274,7 +274,7 @@ private fun OverallGradeCard(
 private fun CategoriesPerformance(data: List<BarData>, isGraded: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -314,7 +314,7 @@ private fun CategoriesPerformance(data: List<BarData>, isGraded: Boolean) {
 private fun WeightDistribution(data: List<ChartData>, isGraded: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -351,7 +351,7 @@ private fun WeightDistribution(data: List<ChartData>, isGraded: Boolean) {
                         data.forEach { segment ->
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -403,7 +403,7 @@ private fun WeightDistribution(data: List<ChartData>, isGraded: Boolean) {
 private fun CategoryDetails(data: List<CategoryWithAssignments>, isGraded: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -437,7 +437,7 @@ private fun CategoryDetails(data: List<CategoryWithAssignments>, isGraded: Boole
                     data.forEach { categoryData ->
                         Surface(
                             shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainer,
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
                             shadowElevation = 1.dp
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {

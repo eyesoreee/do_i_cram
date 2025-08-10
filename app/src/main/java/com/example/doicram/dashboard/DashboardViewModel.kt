@@ -13,13 +13,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class DashboardPayload(
-    val activeCourses: ActiveCoursesInfo,
-    val pendingAssignments: PendingAssignmentsInfo,
-    val needAttention: NeedAttentionInfo,
-    val cgpa: Double?
-)
-
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val coursesRepository: CoursesRepository,

@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,14 +38,10 @@ fun OverviewCard(
     val typography = MaterialTheme.typography
 
     Card(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer)
     ) {
-        Column(
-            Modifier
-                .padding(24.dp)
-                .fillMaxHeight()
-        ) {
+        Column(Modifier.padding(24.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
