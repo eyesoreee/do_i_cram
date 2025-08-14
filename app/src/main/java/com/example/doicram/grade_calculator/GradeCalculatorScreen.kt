@@ -2,6 +2,7 @@ package com.example.doicram.grade_calculator
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,22 +15,31 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -41,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -62,6 +73,8 @@ fun GradeCalculatorScreen(
         )
     }
     var showAddCourseDialog by remember { mutableStateOf(false) }
+    var showAddAssignmentDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
 
     LazyColumn(modifier = modifier.fillMaxSize()) {
         item {
@@ -205,6 +218,192 @@ fun GradeCalculatorScreen(
                     )
                 }
             }
+
+            1 -> {
+                item {
+                    OverviewCard(
+                        title = "Current GPA",
+                        icon = Icons.AutoMirrored.Filled.TrendingUp,
+                        iconColor = MaterialTheme.colorScheme.primary,
+                        mainValue = "${state.gpa ?: "???"}",
+                        mainValueColor = MaterialTheme.colorScheme.primary,
+                        secondaryValue = "/1.00",
+                        bottomIcon = Icons.Default.ArrowUpward,
+                        modifier = Modifier.heightIn(max = 145.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                item {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Assignment Manager",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            IconButton(
+                                onClick = { showEditDialog = showEditDialog.not() }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = null,
+                                )
+                            }
+
+                            TextButton(
+                                onClick = {
+                                    showAddAssignmentDialog = showAddAssignmentDialog.not()
+                                },
+                                modifier = Modifier.border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.inverseSurface,
+                                    MaterialTheme.shapes.extraLarge
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.inverseSurface,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(2.dp))
+                                Text(
+                                    text = "Add Item",
+                                    color = MaterialTheme.colorScheme.inverseSurface
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                items(state.categories) { category ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                        ) {
+                            // Category Header
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Surface(
+                                        modifier = Modifier.size(20.dp),
+                                        shape = CircleShape,
+                                        color = category.color,
+                                        shadowElevation = 2.dp
+                                    ) {}
+
+                                    Text(
+                                        text = category.name,
+                                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                Surface(
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                ) {
+                                    Text(
+                                        text = "${category.assignments.size} assignments",
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        modifier = Modifier
+                                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                                            .weight(1f)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            if (category.assignments.isEmpty()) {
+                                // Empty state
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.padding(24.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.Assignment,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                            modifier = Modifier.size(48.dp)
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(
+                                            text = "No assignments added yet",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                        )
+                                        Text(
+                                            text = "Add your first assignment to get started",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                            modifier = Modifier.padding(top = 4.dp)
+                                        )
+                                    }
+                                }
+                            } else {
+                                // Assignments list
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    category.assignments.forEach { assignment ->
+                                        GpaAssignmentCard(
+                                            assignment = assignment,
+                                            categoryColor = MaterialTheme.colorScheme.primary, // TODO: Subject to change
+                                            onDeleteClick = { course ->
+                                                viewModel.onAction(
+                                                    GradeCalculatorAction.OnDeleteAssignmentClick(
+                                                        course
+                                                    )
+                                                )
+                                            },
+                                            onEditClick = { },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
         }
     }
 
@@ -214,6 +413,36 @@ fun GradeCalculatorScreen(
             onConfirm = { course ->
                 viewModel.onAction(GradeCalculatorAction.OnAddCourseClick(course))
             }
+        )
+    }
+
+    if (showAddAssignmentDialog) {
+        CalculatorAddAssignmentDialog(
+            categories = state.categories,
+            onDismissRequest = {
+                showAddAssignmentDialog = false
+            },
+            onAddAssignment = { assignment ->
+                viewModel.onAction(GradeCalculatorAction.OnAddAssignmentClick(assignment))
+                showAddAssignmentDialog = false
+            }
+        )
+    }
+
+    if (showEditDialog) {
+        CalculatorEditDialog(
+            onDismissRequest = { showEditDialog = false },
+            onEditCourse = { categories, scales ->
+                viewModel.onAction(
+                    GradeCalculatorAction.OnEditClick(
+                        categories,
+                        scales
+                    )
+                )
+                showEditDialog = false
+            },
+            gpaCategories = state.categories,
+            gpaScales = state.scales
         )
     }
 }

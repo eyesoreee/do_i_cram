@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -72,29 +71,29 @@ fun NavigationDrawerContent(
                 Spacer(modifier = Modifier.height(4.dp))
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            NavigationDrawerItem(
-                item = settingsItem,
-                selected = currentItem.route == settingsItem.route,
-                onClick = {
-                    navController.navigate(settingsItem.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                    onItemClick()
-                },
-            )
+//            Spacer(modifier = Modifier.weight(1f))
+//
+//            HorizontalDivider(
+//                modifier = Modifier.padding(horizontal = 8.dp),
+//                color = MaterialTheme.colorScheme.outlineVariant
+//            )
+//
+//            Spacer(modifier = Modifier.height(16.dp))
+//
+//            NavigationDrawerItem(
+//                item = settingsItem,
+//                selected = currentItem.route == settingsItem.route,
+//                onClick = {
+//                    navController.navigate(settingsItem.route) {
+//                        popUpTo(navController.graph.startDestinationId) {
+//                            saveState = true
+//                        }
+//                        launchSingleTop = true
+//                        restoreState = true
+//                    }
+//                    onItemClick()
+//                },
+//            )
         }
     }
 }

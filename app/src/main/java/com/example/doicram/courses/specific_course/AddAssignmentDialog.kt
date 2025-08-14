@@ -62,7 +62,9 @@ fun AddAssignmentDialog(
         val isFormValid = name.isNotBlank() &&
                 selectedCategoryId != null &&
                 maxScore.isNotBlank() &&
-                maxScore.toIntOrNull() != null
+                maxScore.toIntOrNull() != null &&
+                score.isNotBlank() &&
+                score.toIntOrNull() != null
 
         AlertDialog(
             onDismissRequest = onDismissRequest,
@@ -178,7 +180,7 @@ fun AddAssignmentDialog(
                         },
                         label = {
                             Text(
-                                "Current Score",
+                                "Current Score *",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Medium
                                 )
