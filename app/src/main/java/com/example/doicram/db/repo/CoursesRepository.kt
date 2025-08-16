@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface CoursesRepository {
     suspend fun addCourse(course: Courses): Long
-    suspend fun getCourses(): List<CourseWithCategoryAndScale>
+    suspend fun getCourses(showArchived: Boolean = false): List<CourseWithCategoryAndScale>
     suspend fun getCourseById(courseId: Int): CourseWithCategories
     suspend fun getCourseWithFullDetails(courseId: Int): CourseWithFullDetails
     suspend fun deleteCourse(course: Courses)

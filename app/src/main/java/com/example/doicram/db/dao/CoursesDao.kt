@@ -76,12 +76,12 @@ interface CoursesDao {
     FROM courses AS course
     LEFT JOIN grade_categories AS category ON course.id = category.course_id
     LEFT JOIN assignments AS assignment ON category.id = assignment.category_id
-    WHERE course.archived_at IS NULL
+    WHERE :showArchived = 1 OR course.archived_at IS NULL
     GROUP BY course.id
     ORDER BY course.created_at DESC
     """
     )
-    suspend fun getCourseWithAssignmentCounts(): List<CourseWithAssignmentCounts>
+    suspend fun getCourseWithAssignmentCounts(showArchived: Boolean = false): List<CourseWithAssignmentCounts>
 
     @Query("SELECT * FROM grade_categories WHERE course_id = :courseId AND archived_at IS NULL")
     suspend fun getCategoriesForCourse(courseId: Int): List<GradeCategories>

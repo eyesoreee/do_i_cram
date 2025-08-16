@@ -11,6 +11,8 @@ import com.example.doicram.db.repo.CoursesRepository
 import com.example.doicram.db.repo.GradeCategoriesRepository
 import com.example.doicram.db.repo.GradeScaleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +31,8 @@ class CoursesViewModel @Inject constructor(
     private val _state: MutableStateFlow<CoursesState> = MutableStateFlow(CoursesState())
     val state: StateFlow<CoursesState> = _state.asStateFlow()
 
+    private var searchJob: Job? = null
+
     init {
         loadCourses()
     }
@@ -37,7 +41,7 @@ class CoursesViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             try {
-                val fetchedCourses = coursesRepository.getCourses()
+                val fetchedCourses = coursesRepository.getCourses(state.value.showArchived)
                 _state.update {
                     it.copy(
                         courses = fetchedCourses,
@@ -57,7 +61,6 @@ class CoursesViewModel @Inject constructor(
         }
     }
 
-
     fun onAction(action: CoursesAction) {
         when (action) {
             is CoursesAction.AddCourse -> addCourse(action.course, action.categories, action.scales)
@@ -70,10 +73,62 @@ class CoursesViewModel @Inject constructor(
 
             is CoursesAction.SelectCourse -> selectCourse(action.courseId)
             is CoursesAction.DeselectCourse -> _state.update { it.copy(selectedCourse = null) }
-
             is CoursesAction.AddAssignment -> addAssignment(action.assignment)
             is CoursesAction.DeleteAssignment -> deleteAssignment(action.assignment)
             is CoursesAction.UpdateAssignment -> updateAssignment(action.updatedAssignment)
+            is CoursesAction.UpdateSearchQuery -> updateSearchQuery(action.query)
+            is CoursesAction.UpdateSortOption -> updateSortOption(action.sortOption)
+            is CoursesAction.ToggleShowArchived -> toggleShowArchived(action.showArchived)
+            is CoursesAction.ArchiveCourse -> archiveCourse(
+                action.course,
+                System.currentTimeMillis()
+            )
+
+            is CoursesAction.UnarchiveCourse -> archiveCourse(action.course, null)
+        }
+    }
+
+    private fun updateSearchQuery(query: String) {
+        _state.update { it.copy(searchQuery = query) }
+
+        searchJob?.cancel()
+
+        if (query.isNotBlank()) {
+            searchJob = viewModelScope.launch {
+                _state.update { it.copy(isSearching = true) }
+                delay(300L) // Debounce search
+                _state.update { it.copy(isSearching = false) }
+            }
+        } else {
+            _state.update { it.copy(isSearching = false) }
+        }
+    }
+
+    private fun updateSortOption(sortOption: SortOption) {
+        _state.update { it.copy(sortOption = sortOption) }
+    }
+
+    private fun toggleShowArchived(showArchived: Boolean) {
+        _state.update { it.copy(showArchived = showArchived) }
+        loadCourses()
+    }
+
+    private fun archiveCourse(course: Courses, archive: Long?) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            try {
+                val updatedCourse = course.copy(archivedAt = archive)
+                coursesRepository.updateCourse(updatedCourse)
+                loadCourses()
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Failed to ${if (archive != null) "archive" else "unarchive"} course: ${e.localizedMessage ?: "Unknown error"}"
+                    )
+                }
+                e.printStackTrace()
+            }
         }
     }
 
@@ -215,7 +270,7 @@ class CoursesViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        error = "Failed to delete assignment: ${e.localizedMessage ?: "Unknown error"}"
+                        error = "Failed to update assignment: ${e.localizedMessage ?: "Unknown error"}"
                     )
                 }
                 e.printStackTrace()
@@ -257,7 +312,7 @@ class CoursesViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        error = "Failed to add course or categories: ${e.localizedMessage ?: "Unknown error"}"
+                        error = "Failed to update course or categories: ${e.localizedMessage ?: "Unknown error"}"
                     )
                 }
                 e.printStackTrace()

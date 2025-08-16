@@ -22,15 +22,15 @@ class CoursesRepositoryImpl @Inject constructor(
         return coursesDao.addCourse(course)
     }
 
-    override suspend fun getCourses(): List<CourseWithCategoryAndScale> {
-        val coursesWithCounts = coursesDao.getCourseWithAssignmentCounts()
+    override suspend fun getCourses(showArchived: Boolean): List<CourseWithCategoryAndScale> {
+        val coursesWithCounts = coursesDao.getCourseWithAssignmentCounts(showArchived)
 
         return coursesWithCounts.map { course ->
-            val categories = coursesDao.getCategoriesForCourse(course.courses.id)
-            val scales = coursesDao.getGradeScalesForCourse(course.courses.id)
+            val categories = coursesDao.getCategoriesForCourse(course.course.id)
+            val scales = coursesDao.getGradeScalesForCourse(course.course.id)
 
             CourseWithCategoryAndScale(
-                course = course.courses,
+                course = course.course,
                 categories = categories,
                 scales = scales,
                 totalAssignments = course.totalAssignments,

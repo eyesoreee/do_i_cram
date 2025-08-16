@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material.icons.filled.School
@@ -36,10 +37,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.doicram.CourseFilterSortBar
 import com.example.doicram.Loading
 import com.example.doicram.PageHeader
+import com.example.doicram.SearchBar
 import com.example.doicram.courses.course_list.AddCourseDialog
 import com.example.doicram.courses.course_list.CourseCard
+import com.example.doicram.courses.course_list.CourseDialog
 import com.example.doicram.courses.course_list.CourseTabList
 import com.example.doicram.courses.course_list.DeleteCourseDialog
 import com.example.doicram.courses.course_list.EditCourseDialog
@@ -76,6 +80,8 @@ fun CoursesScreen(
     var selectedTabIndex by remember { mutableIntStateOf(-1) }
     var showAddCourseDialog by remember { mutableStateOf(false) }
 
+    val displayedCourses = state.displayCourses
+
     val courseTabs = remember(state.courses) {
         state.courses.map { course ->
             CourseTab(
@@ -95,6 +101,9 @@ fun CoursesScreen(
 
     var showEditCourseDialog by remember { mutableStateOf(false) }
     var courseToEdit by remember { mutableStateOf<CourseWithCategoryAndScale?>(null) }
+
+    var showArchiveCourseDialog by remember { mutableStateOf(false) }
+    var courseToArchive by remember { mutableStateOf<Courses?>(null) }
 
     var showDeleteCourseDialog by remember { mutableStateOf(false) }
     var courseToDelete by remember { mutableStateOf<Courses?>(null) }
@@ -140,6 +149,30 @@ fun CoursesScreen(
             }
 
             item {
+                SearchBar(
+                    searchQuery = state.searchQuery,
+                    onSearchQueryChanged = { query ->
+                        viewModel.onAction(CoursesAction.UpdateSearchQuery(query))
+                    },
+                    placeholder = "Search by course name or code..."
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                CourseFilterSortBar(
+                    showArchived = state.showArchived,
+                    sortOption = state.sortOption,
+                    onShowArchivedChanged = { showArchived ->
+                        viewModel.onAction(CoursesAction.ToggleShowArchived(showArchived))
+                    },
+                    onSortOptionChanged = { sortOption ->
+                        viewModel.onAction(CoursesAction.UpdateSortOption(sortOption))
+                    }
+                )
+            }
+
+            item {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
@@ -179,6 +212,10 @@ fun CoursesScreen(
                 item { Loading() }
             }
 
+            state.isSearching -> {
+                item { Loading() }
+            }
+
             state.error != null -> {
                 item {
                     ErrorLoadingCourses(
@@ -188,11 +225,33 @@ fun CoursesScreen(
                 }
             }
 
-            state.courses.isEmpty() -> {
+            displayedCourses.isEmpty() -> {
                 item {
-                    EmptyCourseList(
-                        onClick = { showAddCourseDialog = showAddCourseDialog.not() }
-                    )
+                    if (state.searchQuery.isEmpty()) {
+                        EmptyCourseList(
+                            onClick = { showAddCourseDialog = showAddCourseDialog.not() }
+                        )
+                    } else {
+                        // Show "No search results" message
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp)
+                        ) {
+                            Text(
+                                text = "No courses found",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Try adjusting your search terms or add a new course.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            )
+                        }
+                    }
                 }
             }
 
@@ -351,16 +410,20 @@ fun CoursesScreen(
             }
 
             else -> {
-                items(state.courses) { course ->
+                items(displayedCourses) { course ->
                     CourseCard(
                         course = course,
                         onEdit = {
                             courseToEdit = course
                             showEditCourseDialog = true
                         },
-                        onDelete = { course ->
-                            courseToDelete = course
+                        onDelete = {
+                            courseToDelete = course.course
                             showDeleteCourseDialog = true
+                        },
+                        onArchive = {
+                            courseToArchive = course.course
+                            showArchiveCourseDialog = true
                         }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -381,7 +444,10 @@ fun CoursesScreen(
     EditCourseDialog(
         showDialog = showEditCourseDialog,
         course = courseToEdit,
-        onDismissRequest = { showEditCourseDialog = false },
+        onDismissRequest = {
+            showEditCourseDialog = false
+            courseToEdit = null
+        },
         onEditCourse = { course, categories, scales ->
             viewModel.onAction(CoursesAction.UpdateCourse(course, categories, scales))
             showEditCourseDialog = false
@@ -394,7 +460,7 @@ fun CoursesScreen(
         showDialog = showDeleteCourseDialog,
         onDismissRequest = {
             showDeleteCourseDialog = showDeleteCourseDialog.not()
-            courseToEdit = null
+            courseToDelete = null
         },
         onDelete = {
             courseToDelete.let {
@@ -432,7 +498,10 @@ fun CoursesScreen(
 
     DeleteAssignmentDialog(
         showDialog = showDeleteAssignmentDialog,
-        onDismissRequest = { showDeleteAssignmentDialog = showDeleteAssignmentDialog.not() },
+        onDismissRequest = {
+            showDeleteAssignmentDialog = false
+            assignmentToDelete = null
+        },
         onDelete = {
             assignmentToDelete.let {
                 viewModel.onAction(CoursesAction.DeleteAssignment(assignmentToDelete!!))
@@ -440,5 +509,24 @@ fun CoursesScreen(
             showDeleteAssignmentDialog = false
             assignmentToDelete = null
         }
+    )
+
+    CourseDialog(
+        showDialog = showArchiveCourseDialog,
+        onDismissRequest = {
+            showArchiveCourseDialog = false
+            courseToArchive = null
+        },
+        title = "Archive Course",
+        titleIcon = Icons.Default.Archive,
+        description = "Are you sure to archive this dialog?",
+        onClick = {
+            courseToArchive.let {
+                viewModel.onAction(CoursesAction.ArchiveCourse(courseToArchive!!))
+            }
+            showArchiveCourseDialog = false
+            courseToArchive = null
+        },
+        onClickText = "Archive"
     )
 }
