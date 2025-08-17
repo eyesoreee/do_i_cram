@@ -11,6 +11,8 @@ import com.example.doicram.db.entities.Courses
 import com.example.doicram.db.entities.GradeScale
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.math.BigDecimal
+import java.math.RoundingMode
 import javax.inject.Inject
 
 class CoursesRepositoryImpl @Inject constructor(
@@ -69,16 +71,22 @@ class CoursesRepositoryImpl @Inject constructor(
     override fun getCGPA(): Flow<Double?> {
         return coursesDao.getActiveCoursesWithScaleFlow()
             .map { activeCourses ->
-                val totalUnits = activeCourses.sumOf { it.course.units }
+                val coursesWithGrades = activeCourses.filter { it.course.grade != null }
 
-                val totalGradePoints = activeCourses.sumOf { cw ->
-                    val gpa = cw.course.grade
-                        ?.let { GradeScale.calculateGpa(it, cw.gradeScales) }
-                        ?: 0.0
+                if (coursesWithGrades.isEmpty())
+                    return@map null
+
+                val totalUnits = coursesWithGrades.sumOf { it.course.units }
+
+                val totalGradePoints = coursesWithGrades.sumOf { cw ->
+                    val gpa = GradeScale.calculateGpa(cw.course.grade!!, cw.gradeScales) ?: 0.0
                     gpa * cw.course.units
                 }
 
-                if (totalUnits > 0) totalGradePoints / totalUnits else null
+                if (totalUnits > 0) {
+                    val raw = totalGradePoints / totalUnits
+                    raw.round(3)
+                } else null
             }
     }
 
@@ -98,4 +106,10 @@ class CoursesRepositoryImpl @Inject constructor(
         return coursesDao.getNeedAttentionInfoFlow()
     }
 
+}
+
+fun Double.round(decimalPrecision: Int): Double {
+    return BigDecimal(this.toString())
+        .setScale(decimalPrecision, RoundingMode.HALF_UP)
+        .toDouble()
 }
