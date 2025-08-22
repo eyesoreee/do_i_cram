@@ -32,7 +32,7 @@
 
 ## 🚀 How to Install
 
-1.  **Download the APK:** [Link to your APK file in the GitHub Release page].
+1.  **Download the APK:** https://github.com/eyesoreee/do_i_cram/releases/tag/v1.0.0.
 2.  **Enable Unknown Sources:** On your Android device, go to **Settings** > **Security** > and enable **"Install unknown apps"** or **"Unknown sources"** for your browser or file manager.
 3.  **Install:** Locate the downloaded APK file and tap on it to start the installation.
 
